@@ -1,0 +1,35 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms" x:Class="App_Launcher.EditApp"
+    
+        Title="EditApp" Height="420" Width="466" FontSize="14" MinWidth="380" MinHeight="390" SizeChanged="Window_SizeChanged" Loaded="Window_Loaded" Icon="Images/list.png" IsHitTestVisible="False">
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo ProgressState="Normal"/>
+    </Window.TaskbarItemInfo>
+    <Grid>
+        <ListBox Name="app_list" Margin="5,26,5,40" SelectionMode="Extended"/>
+        <Button Content="Save" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="75" Height="25" Background="{x:Null}" Click="Save_Click"/>
+        <Button Content="Cancel" HorizontalAlignment="Right" Margin="0,0,90,10" VerticalAlignment="Bottom" Width="75" Height="25" Background="{x:Null}" Click="Discard_Click"/>
+        <Menu FontSize="14" VerticalAlignment="Top">
+            <MenuItem Header="ACTION">
+                <MenuItem Header="Save" Click="Save_Click"/>
+                <Separator/>
+                <MenuItem Header="Discard" Click="Discard_Click"/>
+            </MenuItem>
+            <MenuItem Header="ITEMS">
+                <MenuItem Header="Add an app" Click="Add_Click"/>
+                <MenuItem Header="Add all apps in a directory"  Click="AddFrom_Click"/>
+                <Separator/>
+                <MenuItem Header="Delete selected item(s)" Click="DeleteSelected_Click"/>
+                <MenuItem Header="Delete checked item(s)" Click="DeleteChecked_Click"/>
+            </MenuItem>
+            <MenuItem Header="EDIT">
+                <MenuItem Header="Check all" Click="SelectAll_Click"/>
+                <MenuItem Header="Check none" Click="CheckNone_Click"/>
+                <MenuItem Header="Invert checked items" Click="Invert_Click"/>
+            </MenuItem>
+        </Menu>
+        <ProgressBar Name="processbar" Margin="140,180,0,0" HorizontalAlignment="Left" Width="178" Height="29" VerticalAlignment="Top"/>
+    </Grid>
+</Window>
