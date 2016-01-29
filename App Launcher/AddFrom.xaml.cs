@@ -28,7 +28,6 @@ namespace App_Launcher
             InitializeComponent();
         }
 
-
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             foreach (var i in orginal)

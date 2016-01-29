@@ -3,14 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms" x:Class="App_Launcher.EditApp"
     
-        Title="EditApp" Height="420" Width="466" FontSize="14" MinWidth="380" MinHeight="390" SizeChanged="Window_SizeChanged" Loaded="Window_Loaded" Icon="Images/list.png" IsHitTestVisible="False">
+        Title="EditApp" Height="420" Width="466" FontSize="14" MinWidth="380" MinHeight="390" SizeChanged="Window_SizeChanged" Loaded="Window_Loaded" Icon="Images/list.png" Closing="Window_Closing">
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo ProgressState="Normal"/>
     </Window.TaskbarItemInfo>
     <Grid>
-        <ListBox Name="app_list" Margin="5,26,5,40" SelectionMode="Extended"/>
-        <Button Content="Save" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="75" Height="25" Background="{x:Null}" Click="Save_Click"/>
-        <Button Content="Cancel" HorizontalAlignment="Right" Margin="0,0,90,10" VerticalAlignment="Bottom" Width="75" Height="25" Background="{x:Null}" Click="Discard_Click"/>
+        <ListBox Visibility="Hidden" Name="app_list" Margin="0,21,0,35" SelectionMode="Extended"/>
+        <Button Content="Save" HorizontalAlignment="Right" Margin="0,0,10,5" VerticalAlignment="Bottom" Width="75" Height="25" Background="{x:Null}" Click="Save_Click"/>
+        <Button Content="Cancel" HorizontalAlignment="Right" Margin="0,0,90,5" VerticalAlignment="Bottom" Width="75" Height="25" Background="{x:Null}" Click="Discard_Click"/>
         <Menu FontSize="14" VerticalAlignment="Top">
             <MenuItem Header="ACTION">
                 <MenuItem Header="Save" Click="Save_Click"/>
@@ -30,6 +30,7 @@
                 <MenuItem Header="Invert checked items" Click="Invert_Click"/>
             </MenuItem>
         </Menu>
-        <ProgressBar Name="processbar" Margin="140,180,0,0" HorizontalAlignment="Left" Width="178" Height="29" VerticalAlignment="Top"/>
+        <ProgressBar Name="processbar" Margin="140,180,140,0" Height="29" VerticalAlignment="Top"/>
+        <TextBlock x:Name="Count" HorizontalAlignment="Left" Margin="10,0,0,5" TextWrapping="Wrap" VerticalAlignment="Bottom" FontSize="18" Foreground="RoyalBlue"/>
     </Grid>
 </Window>

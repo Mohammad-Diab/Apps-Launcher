@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -12,9 +14,11 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Shell;
 
 namespace App_Launcher
 {
@@ -23,14 +27,39 @@ namespace App_Launcher
     /// </summary>
     public partial class MainWindow : Window
     {
+        List<int> n = new List<int>();
+        List<Key> Keys;
+        Key[] keys = { Key.Oem3, Key.Q, Key.W, Key.E, Key.R, Key.T, Key.Y, Key.U, Key.I, Key.O, Key.P, Key.OemOpenBrackets, Key.Oem6, Key.A, Key.S, Key.D, Key.F, Key.G, Key.H, Key.J, Key.K, Key.L, Key.Oem1, Key.OemQuotes, Key.Z, Key.X, Key.C, Key.V, Key.B, Key.N, Key.M, Key.OemComma, Key.OemPeriod, Key.OemQuestion };
+        string[] AR = { "ذ", "ض", "ص", "ث", "ق", "ف", "غ", "ع", "ه", "خ", "ح", "ج", "د", "ش", "س", "ي", "ب", "ل", "ا", "ت", "ن", "م", "ك", "ط", "ئ", "ء", "ؤ","ر", "لا", "ى", "ة", "و", "ز", "ظ", "ّ", "َ", "ً", "ُ", "ٌ", "لإ", "إ", "‘", "÷", "×", "؛", "<", ">", "ِ", "ٍ", "]", "[", "لأ", "أ", "ـ", "،", ":", "\"", "~", "ْ", "}", "{", "لآ", "آ", "’", ",", ".", "؟" };
+        string[] EN = { "`", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "~", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "{", "}", "A", "S", "D", "F", "G", "H", "J", "K", "L", ":", "\"", "Z", "X", "C", "V", "B", "N", "M", "<", ">", "?" };
         List<AppElements> new_apps = new List<AppElements>();
         List<string> windows_apps = new List<string>();
+        BackgroundWorker bw1;
         bool fake = true;
+        bool inAction = false;
         bool auto = false;
+        bool cancel_hide;
         public MainWindow()
         {
+            //((Window)Process.GetProcesses()[0].MainWindowHandle).Show() ;
             InitializeComponent();
         }
+
+        //        private object myJumpList_JumpItemsRejected(object sender,JumpItemsRejectedEventArgs e)
+        //        {
+        //                                             handle myJumpList.JumpItemsRejected
+        //        foreach (var i  in e.RejectedItems)
+        //            Debug.WriteLine(CType(i, JumpTask).Title);
+        //        }
+
+        //private Sub myJumpList_JumpItemsRemovedByUser(ByVal sender As Object, ByVal e As  _                                                 System.Windows.Shell.JumpItemsRemovedEventArgs)
+        //    {
+        //                                                  Handles myJumpList.JumpItemsRemovedByUser
+        //        foreach( element In e.RemovedItems
+        //            Debug.WriteLine(CType(element, JumpTask).Title)
+        //        Next
+        //        Debug.WriteLine(e.RemovedItems.Count)
+        //        }
 
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
@@ -64,22 +93,32 @@ namespace App_Launcher
             System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog();
             ofd.Filter = "Applications|*.exe";
             ofd.Title = "Select an application to add";
-            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK && new FileInfo(ofd.FileName).Extension.ToLower().Equals(".exe"))
+            ofd.Multiselect = true;
+            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                AppElements app = new AppElements(ofd.SafeFileName.Substring(0, ofd.SafeFileName.Length - 4), ofd.FileName, 0);
-                if (!app.ExistedIn(OrginalList.orginal_list, -1))
-                {
-                    ListViewItem item = new ListViewItem();
-                    item.Content = app.app_name;
-                    item.ToolTip = app.app_path;
-                    app_list.Items.Add(item);
-                    OrginalList.orginal_list.Add(app);
-                    string ex;
-                    if (!OrginalList.SaveFile(out ex))
-                        MessageBox.Show(ex, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Stop);
-                }
-                else
-                    MessageBox.Show("This application is already existe in the list", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+                int compleated = 0;
+                string not_complete = "";
+                foreach (string i in ofd.FileNames)
+                    if (new FileInfo(i).Extension.ToLower().Equals(".exe"))
+                    {
+                        AppElements app = new AppElements(i.Substring(0, i.Length - 4), i, 0);
+                        if (!app.ExistedIn(OrginalList.orginal_list, -1))
+                        {
+                            ListViewItem item = new ListViewItem();
+                            item.Content = app.app_name;
+                            item.ToolTip = app.app_path;
+                            app_list.Items.Add(item);
+                            OrginalList.orginal_list.Add(app);
+                            compleated++;
+                        }
+                        else
+                            not_complete = i;
+                    }
+                if (compleated < ofd.FileNames.Length)
+                    MessageBox.Show((ofd.FileNames.Length - compleated == 1 ? "This application \"" + not_complete + "\"" : "Some applications") + " is already existe in the list.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+                string ex;
+                if (!OrginalList.SaveFile(out ex))
+                    MessageBox.Show(ex, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Stop);
             }
         }
 
@@ -92,7 +131,7 @@ namespace App_Launcher
             RebuildList(search.Text);
         }
 
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void Search_TextChanged(object sender, TextChangedEventArgs e)
         {
             TextBlock tmp;
             if (((TextBox)sender) == search)
@@ -335,6 +374,7 @@ namespace App_Launcher
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            Keys = keys.ToList<Key>();
             DirectoryInfo system = new DirectoryInfo(Environment.SystemDirectory);
             DirectoryInfo windows = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.Windows));
             FileInfo[] win_pro = windows.GetFiles("*.exe");
@@ -388,6 +428,10 @@ namespace App_Launcher
             string ex;
             if (!OrginalList.SaveFile(out ex))
                 MessageBox.Show(ex, "Error while saving application list", MessageBoxButton.OK, MessageBoxImage.Stop);
+            //e.Cancel = true;
+            WindowState = WindowState.Minimized;
+
+            //Hide();
         }
 
         private void search_PreviewKeyUp(object sender, KeyEventArgs e)
@@ -406,6 +450,8 @@ namespace App_Launcher
                     { MessageBox.Show(ex.Message, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Error); }
                 }
             }
+            if (search.Text.Equals(string.Empty))
+                n.Clear();
         }
 
         private void Window_LocationChanged(object sender, EventArgs e)
@@ -450,7 +496,7 @@ namespace App_Launcher
                 MessageBox.Show("Done", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private void run_PreviewKeyUp(object sender, KeyEventArgs e)
+        private void Run_PreviewKeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
@@ -475,6 +521,166 @@ namespace App_Launcher
                 try
                 { Process.Start(run.Text); }
                 catch (Exception ex) { MessageBox.Show(ex.Message, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Error); }
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            search.Clear();
+            n.Clear();
+        }
+
+        private void search_PreviewKeydown(object sender, KeyEventArgs e)
+        {
+            if (e.Key >= Key.A && e.Key <= Key.Z)
+                if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+                    if (Keyboard.IsKeyToggled(Key.CapsLock))
+                        n.Add(Keys.IndexOf(e.Key));
+                    else
+                        n.Add(Keys.IndexOf(e.Key) + 34);
+                else
+                    if (Keyboard.IsKeyToggled(Key.CapsLock))
+                        n.Add(Keys.IndexOf(e.Key) + 34);
+                    else
+                        n.Add(Keys.IndexOf(e.Key));
+            else if (e.Key >= Key.Oem3 || e.Key >= Key.OemOpenBrackets || e.Key >= Key.Oem6 || e.Key >= Key.Oem1 || e.Key >= Key.OemQuotes || e.Key >= Key.OemComma || e.Key >= Key.OemPeriod || e.Key >= Key.OemQuestion)
+                n.Add(Keys.IndexOf(e.Key));
+            else if (e.Key.Equals(Key.Back) && n.Count > 0 && search.Text.Length > 1)
+                n.RemoveAt(search.CaretIndex < search.Text.Length ? search.CaretIndex : search.Text.Length - 1 > n.Count ? 0 : search.Text.Length - 1);
+            else if (e.Key.Equals(Key.Delete) && n.Count > 1 && search.CaretIndex > 1 && search.Text.Length > 1)
+                n.RemoveAt(search.CaretIndex < search.Text.Length ? search.CaretIndex - 1 : search.Text.Length - 1 > n.Count ? 0 : search.Text.Length - 1);
+        }
+
+        private void SwicthLanguage_Click(object sender, RoutedEventArgs e)
+        {
+            StringBuilder st_ar = new StringBuilder();
+            StringBuilder st_en = new StringBuilder();
+            foreach (int i in n)
+            {
+                st_ar.Append(AR[i]);
+                st_en.Append(EN[i]);
+            }
+            if (st_ar.ToString().Equals(search.Text))
+                search.Text = (st_en.ToString());
+            else if (st_en.ToString().Equals(search.Text))
+                search.Text = (st_ar.ToString());
+            else
+            {
+                List<string> ar_list=AR.ToList<string>();
+                List<string> en_list=EN.ToList<string>();
+                string search_text = search.Text;
+                List<int> search_index = new List<int>();
+                StringBuilder new_search_text=new StringBuilder();
+                foreach (char i in search_text)
+                {
+                    int ar_index=ar_list.IndexOf(i.ToString());
+                    int en_index = -1;
+                    if (ar_index > -1)
+                        new_search_text.Append(EN[ar_index]);
+                    else
+                    {
+                        en_index = en_list.IndexOf(i.ToString());
+                        new_search_text.Append(AR[en_index]);
+                    }
+                }
+                search.Text = new_search_text.ToString();
+            }
+        }
+
+        private void Window_MouseLeave(object sender, MouseEventArgs e)
+        {
+            cancel_hide = false;
+            bw1 = new BackgroundWorker();
+            bw1.DoWork += bw1_DoWork;
+            bw1.WorkerSupportsCancellation = true;
+            bw1.WorkerReportsProgress = true;
+            bw1.ProgressChanged += bw1_ProgressChanged;
+            bw1.RunWorkerAsync();
+        }
+
+        private void bw1_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            if (Left > -10 && !inAction)
+            {
+                inAction = true;
+                //DoubleAnimation animation = new DoubleAnimation((-1) * ActualWidth, new Duration(new TimeSpan(1500000))); //arabic Layout
+                DoubleAnimation animation = new DoubleAnimation(SystemParameters.PrimaryScreenWidth, new Duration(new TimeSpan(1500000))); //english
+                BeginAnimation(LeftProperty, animation);
+                BackgroundWorker bw = new BackgroundWorker();
+                bw.DoWork += bw_DoWork;
+                bw.RunWorkerCompleted += bw_RunWorkerCompleted;
+                bw.RunWorkerAsync();
+            }
+        }
+
+        private void bw1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            for (int i = 0; i < 50; i++)
+            {
+                Thread.Sleep(20);
+                if (cancel_hide)
+                    break;
+            }
+            if (!cancel_hide)
+                bw1.ReportProgress(10);
+        }
+
+        private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            //DoubleAnimation animation = new DoubleAnimation(Left + 15, new Duration(new TimeSpan(750000))); //arabic Layout
+            DoubleAnimation animation = new DoubleAnimation(Left - 15, new Duration(new TimeSpan(750000))); //english Layout
+            BeginAnimation(LeftProperty, animation);
+            BackgroundWorker bw = new BackgroundWorker();
+            bw.DoWork += bw2_DoWork;
+            bw.RunWorkerAsync(150);
+        }
+
+        private void bw2_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Thread.Sleep((int)e.Argument);
+            inAction = false;
+        }
+
+        void bw_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Thread.Sleep(200);
+        }
+
+        private void Window_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (bw1 != null && bw1.IsBusy)
+                bw1.CancelAsync();
+            if (!inAction)
+            {
+                //if(Left<-4) arabic
+                if (Left < SystemParameters.PrimaryScreenWidth - 5)
+                {
+                    Focus();
+                    inAction = true;
+                    //DoubleAnimation animation = new DoubleAnimation(-5, new Duration(new TimeSpan(2500000))); //arabic
+                    DoubleAnimation animation = new DoubleAnimation(SystemParameters.PrimaryScreenWidth - ActualWidth + 5, new Duration(new TimeSpan(2500000))); //english
+                    BeginAnimation(LeftProperty, animation);
+                    BackgroundWorker bw = new BackgroundWorker();
+                    bw.DoWork += bw2_DoWork;
+                    bw.RunWorkerAsync(350);
+                }
+                cancel_hide = true;
+            }
+        }
+
+        private void Window_Deactivated(object sender, EventArgs e)
+        {
+            if (Left > SystemParameters.PrimaryScreenWidth - ActualWidth && !inAction)
+            //if (Left > -10 && !inAction)  arabic
+            {
+                inAction = true;
+                //DoubleAnimation animation = new DoubleAnimation((-1) * ActualWidth, new Duration(new TimeSpan(1500000))); //arabic Layout
+                DoubleAnimation animation = new DoubleAnimation(SystemParameters.PrimaryScreenWidth, new Duration(new TimeSpan(1500000))); //english
+                BeginAnimation(LeftProperty, animation);
+                BackgroundWorker bw = new BackgroundWorker();
+                bw.DoWork += bw_DoWork;
+                bw.RunWorkerCompleted += bw_RunWorkerCompleted;
+                bw.RunWorkerAsync();
             }
         }
     }

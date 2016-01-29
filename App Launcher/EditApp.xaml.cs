@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Interop;
 using System.ComponentModel;
+using System.Threading;
 
 namespace App_Launcher
 {
@@ -23,6 +24,8 @@ namespace App_Launcher
     public partial class EditApp : Window
     {
         bool save = false;
+        BackgroundWorker bw2, bw1;
+        bool done;      //variable th check if BackgroundWorker process change function has complete his iteration
         static public BitmapSource[] images;
         List<AppElements> new_apps = new List<AppElements>();
         public EditApp()
@@ -37,13 +40,13 @@ namespace App_Launcher
                 if (!app.ExistedIn(new_apps, -1))
                 {
                     new_apps.Add(app);
-                    app_list.Items.Insert(0, CreateList(-2, app, false));
+                    app_list.Items.Insert(0, CreateList(-2, app, false, true));
                 }
                 else
                     MessageBox.Show("This application is already existe in the list", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Asterisk);
         }
 
-        private ListBoxItem CreateList(int index, AppElements app, bool cheacked)
+        private ListBoxItem CreateList(int index, AppElements app, bool cheacked, bool imaged)
         {
             index = -1;
             Image img = new Image();
@@ -57,8 +60,7 @@ namespace App_Launcher
             name.VerticalAlignment = VerticalAlignment.Top;
             name.Foreground = System.Windows.Media.Brushes.Crimson;
             name.Margin = OrginalList.name_thickness;
-            name.TextWrapping = TextWrapping.NoWrap;
-            name.Height = 21;
+            //name.TextWrapping = TextWrapping.NoWrap;
             name.BorderBrush = null;
 
             Rectangle rec = new Rectangle();
@@ -107,14 +109,28 @@ namespace App_Launcher
 
             Grid grid = new Grid();
             //if (index < 0)
+            if (!imaged)
+                img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/applicaton.png"));
+            else
+            {
                 try
                 { img.Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(app.app_path).Handle, System.Windows.Int32Rect.Empty, System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()); }
                 catch (Exception)
                 {
                     grid.Opacity = 0.7;
                     grid.Background = Brushes.Coral;
-                    img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/deleted.png"));
+                    img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/applicaton.png"));
                 }
+            }
+            //try
+            //    { img.Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(app.app_path).Handle, System.Windows.Int32Rect.Empty, System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()); }
+
+            //    catch (Exception)
+            //    {
+            //        grid.Opacity = 0.7;
+            //        grid.Background = Brushes.Coral;
+            //        img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/applicaton.png")); 
+            //    }
             //else
             //    if (images[index] != null)
             //        img.Source = images[index];
@@ -124,7 +140,7 @@ namespace App_Launcher
             //        grid.Background = Brushes.Coral;
             //        img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/deleted.png"));
             //    }
-            grid.Width = app_list.ActualWidth - 25;
+            grid.Width = app_list.ActualWidth - 32;
             grid.Children.Add(img);
             grid.Children.Add(name);
             grid.Children.Add(path);
@@ -135,7 +151,7 @@ namespace App_Launcher
 
             ListViewItem item = new ListViewItem();
             //item.ContextMenuOpening += File_ContextMenuCreator;
-            item.Width = app_list.ActualWidth - 10;
+            //item.Width = app_list.ActualWidth - 10;
             item.ContentStringFormat = app.app_path;
             //item.ContextMenu = new ContextMenu();
             item.Content = grid;
@@ -200,7 +216,7 @@ namespace App_Launcher
                             if (!i.ExistedIn(new_apps, -1))
                             {
                                 added++;
-                                app_list.Items.Insert(0, CreateList(-7, i, false));
+                                app_list.Items.Insert(0, CreateList(-7, i, false, true));
                                 new_apps.Add(i);
                             }
                         }
@@ -239,10 +255,10 @@ namespace App_Launcher
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             foreach (ListBoxItem i in app_list.Items)
-            {
-                ((Grid)i.Content).Width = app_list.ActualWidth - 25;
-                i.Width = app_list.ActualWidth - 10;
-            }
+                //{
+                ((Grid)i.Content).Width = app_list.ActualWidth - 32;
+            //    i.Width = app_list.ActualWidth - 10;
+            //}
         }
 
         private void SelectAll_Click(object sender, RoutedEventArgs e)
@@ -297,35 +313,94 @@ namespace App_Launcher
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             images = new BitmapSource[OrginalList.orginal_list.Count];
-            BackgroundWorker bw = new BackgroundWorker();
-            bw.DoWork += bw_DoWork;
-            bw.WorkerReportsProgress = true;
-            bw.ProgressChanged += bw_ProgressChanged;
-            bw.RunWorkerCompleted += bw_RunWorkerCompleted;
-            bw.RunWorkerAsync(/*images*/);
+            bw2 = new BackgroundWorker();
+            bw2.DoWork += bw_DoWork;
+            bw2.WorkerReportsProgress = true;
+            bw2.WorkerSupportsCancellation = true;
+            bw2.ProgressChanged += bw_ProgressChanged;
+            bw2.RunWorkerCompleted += bw_RunWorkerCompleted;
+            bw2.RunWorkerAsync(/*images*/);
+            processbar.Value = TaskbarItemInfo.ProgressValue = 0;
         }
 
         void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            processbar.Value = TaskbarItemInfo.ProgressValue = 0;
+            //processbar.Value = TaskbarItemInfo.ProgressValue = 0;
+            //for (int i = 0; i < OrginalList.orginal_list.Count; i++)
+            //{
+            //    app_list.Items.Add(CreateList(i, OrginalList.orginal_list[i], false));
+            //    new_apps.Add(OrginalList.orginal_list[i]);
+            //    processbar.Visibility = Visibility.Collapsed;
+            //    IsHitTestVisible = true;
+            //    TaskbarItemInfo.ProgressValue += 1.0 / OrginalList.orginal_list.Count;
+            //    processbar.Value += 100.0 / OrginalList.orginal_list.Count;
+            //}
+            processbar.Visibility = Visibility.Collapsed;
+            app_list.Visibility = Visibility.Visible;
+            Count.Text = app_list.Items.Count + " item" + (app_list.Items.Count > 1 ? "s" : "");
+            bw1 = new BackgroundWorker();
+            bw1.WorkerReportsProgress = true;
+            bw1.WorkerSupportsCancellation = true;
+            bw1.DoWork += bw2_DoWork;
+            bw1.ProgressChanged += bw2_ProgressChanged;
+            bw1.RunWorkerAsync();
+        }
+
+        private void bw2_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            int i = e.ProgressPercentage;
+            Grid grid = (Grid)((ListViewItem)app_list.Items[i]).Content;
+            Image img = (Image)grid.Children[0];
+            string path = ((ListViewItem)app_list.Items[i]).ContentStringFormat;
+            if (File.Exists(path))
+                try
+                { img.Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(path).Handle, System.Windows.Int32Rect.Empty, System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()); }
+                catch (Exception)
+                {
+                    grid.Opacity = 0.7;
+                    grid.Background = Brushes.Coral;
+                    img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/deleted.png"));
+                }
+            else
+            {
+                grid.Opacity = 0.7;
+                grid.Background = Brushes.Coral;
+                img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/deleted.png"));
+            }
+            done = true;
+        }
+
+        private void bw2_DoWork(object sender, DoWorkEventArgs e)
+        {
             for (int i = 0; i < OrginalList.orginal_list.Count; i++)
             {
-                app_list.Items.Add(CreateList(i, OrginalList.orginal_list[i], false));
-                new_apps.Add(OrginalList.orginal_list[i]);
-                processbar.Visibility = Visibility.Collapsed;
-                IsHitTestVisible = true;
-                TaskbarItemInfo.ProgressValue += 1.0 / OrginalList.orginal_list.Count;
-                processbar.Value += 100.0 / OrginalList.orginal_list.Count;
+                done = false;
+                ((BackgroundWorker)sender).ReportProgress(i);
+                while (!done)
+                    Thread.Sleep(1);
             }
         }
 
         void bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
+            //for (int i = 0; i < OrginalList.orginal_list.Count; i++)
+            //{
+            int i = e.ProgressPercentage;
+            app_list.Items.Add(CreateList(i, OrginalList.orginal_list[i], false, false));
+            new_apps.Add(OrginalList.orginal_list[i]);
+            TaskbarItemInfo.ProgressValue += 1.0 / OrginalList.orginal_list.Count;
+            processbar.Value += 100.0 / OrginalList.orginal_list.Count;
+            //}
             //processbar.Value = (e.ProgressPercentage * 50.0) / (OrginalList.orginal_list.Count + 0.0);
         }
 
         void bw_DoWork(object sender, DoWorkEventArgs e)
         {
+            for (int i = 0; i < OrginalList.orginal_list.Count; i++)
+            {
+                ((BackgroundWorker)sender).ReportProgress(i);
+                Thread.Sleep(1);
+            }
             //BitmapSource[] images = (BitmapSource[])e.Argument;
             //for (int i = 0; i < OrginalList.orginal_list.Count; i++)
             //{
@@ -337,6 +412,14 @@ namespace App_Launcher
             //    }
             //    ((BackgroundWorker)sender).ReportProgress(i);
             //}
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            if (bw2 != null && bw2.IsBusy)
+                bw2.CancelAsync();
+            if (bw1 != null && bw1.IsBusy)
+                bw1.CancelAsync();
         }
     }
 }

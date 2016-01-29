@@ -1,15 +1,27 @@
 ﻿<Window x:Class="App_Launcher.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="App Launcher" Height="300" Width="325" MinHeight="80" Loaded="Window_Loaded" Closing="Window_Closing" Icon="Images/main_icon.png" MinWidth="200" LocationChanged="Window_LocationChanged" SizeChanged="Window_SizeChanged">
+        Title="App Launcher" Height="300" Width="325" MinHeight="80" Loaded="Window_Loaded" Closing="Window_Closing" Icon="Images/main_icon.png" MinWidth="200" LocationChanged="Window_LocationChanged" SizeChanged="Window_SizeChanged" MouseLeave="Window_MouseLeave" MouseEnter="Window_MouseEnter" Deactivated="Window_Deactivated">
     <Window.ContextMenu>
         <ContextMenu>
             <MenuItem Name="show" Header="Hide title bar" Click="ShowHide_Click" IsCheckable="True" IsChecked="True"/>
-            <MenuItem Header="Quick add an app" Click="QuickAdd_Click">
+            <MenuItem Header="Quick add apps" Click="QuickAdd_Click">
                 <MenuItem.Icon>
                     <Image  Source="Images/add16.png"/>
                 </MenuItem.Icon>
             </MenuItem>
+            <Separator/>
+            <MenuItem Header="Restore apps list">
+                <MenuItem.Icon>
+                    <Image  Source="Images/add16.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Backup apps list">
+                <MenuItem.Icon>
+                    <Image  Source="Images/add16.png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <Separator/>
             <MenuItem Header="Edit apps list" Click="Edit_Click">
                 <MenuItem.Icon>
                     <Image  Source="Images/edit-app.png"/>
@@ -41,17 +53,19 @@
     </Window.ContextMenu>
     <Grid>
         <TextBlock x:Name="run_label" Margin="12,6,49,0" TextWrapping="Wrap" Text="Run" VerticalAlignment="Top" FontSize="14" Foreground="#FF292929" Opacity="0.5"/>
-        <TextBox Name="run" Margin="10,5,47,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="14" TextChanged="TextBox_TextChanged" PreviewKeyUp="run_PreviewKeyUp" Background="{x:Null}"/>
+        <TextBox Name="run" Margin="10,5,47,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="14" TextChanged="Search_TextChanged" PreviewKeyUp="Run_PreviewKeyUp" Background="{x:Null}"/>
         <TextBlock x:Name="search_box_label" Margin="49,0,86,6" TextWrapping="Wrap" Text="Search Here" VerticalAlignment="Bottom" FontSize="14" Foreground="#FF292929" Opacity="0.5"/>
-        <TextBox Name="search" Margin="47,0,84,5" TextWrapping="Wrap" VerticalAlignment="Bottom" FontSize="14" TextChanged="TextBox_TextChanged" PreviewKeyUp="search_PreviewKeyUp" Background="{x:Null}"/>
+        <TextBox Name="search" Margin="47,0,84,5" VerticalAlignment="Bottom" FontSize="14" TextChanged="Search_TextChanged" PreviewKeyUp="search_PreviewKeyUp" PreviewKeyDown="search_PreviewKeydown"  Background="{x:Null}"/>
         <ListBox Name="app_list" Margin="10,29,10,31"/>
         <Button Content="#" HorizontalAlignment="Left" Margin="10,0,0,6" VerticalAlignment="Bottom" Width="32" Background="{x:Null}" FontSize="12" Height="20" IsEnabled="False"/>
-        <Button HorizontalAlignment="Right" Margin="0,5,10,0" VerticalAlignment="Top" Width="32" Background="{x:Null}" FontSize="12" Height="20" ToolTip="Find a program" Click="Browser_Click">
+        <Button HorizontalAlignment="Right" Margin="0,5,10,0" VerticalAlignment="Top" Width="32" Background="{x:Null}" FontSize="12" Height="21" ToolTip="Find a program" Click="Browser_Click">
             <Button.Content>
                 <Image Source="Images/browser.png"/>
             </Button.Content>
         </Button>
-        <Button Content="cl" ToolTip="Clear text" HorizontalAlignment="Right" Margin="0,0,47,6" VerticalAlignment="Bottom" Width="32" Background="{x:Null}"/>
-        <Button Content="sw" ToolTip="Wwitch between arabic and english letter" HorizontalAlignment="Right" Margin="0,0,10,6" VerticalAlignment="Bottom" Width="32" Background="{x:Null}"/>
+        <Button Content="cl" ToolTip="Clear text" HorizontalAlignment="Right" Margin="0,0,47,5" VerticalAlignment="Bottom" Width="32" Background="{x:Null}" Height="21" Click="Button_Click"/>
+        <Button Content="sw" ToolTip="Switch between arabic and english letter" HorizontalAlignment="Right" Margin="0,0,10,5" VerticalAlignment="Bottom" Width="32" Background="{x:Null}" Height="21" Click="SwicthLanguage_Click"/>
     </Grid>
 </Window>
+    
+    
