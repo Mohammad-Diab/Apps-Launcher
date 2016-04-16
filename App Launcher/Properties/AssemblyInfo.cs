@@ -10,9 +10,9 @@ using System.Windows;
 [assembly: AssemblyTitle("App Launcher")]
 [assembly: AssemblyDescription("App Launcher")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Legend")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("App Launcher")]
-[assembly: AssemblyCopyright("Copyright © Legend Corporation 2014")]
+[assembly: AssemblyCopyright("Copyright © Mohammad 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -51,5 +51,5 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.5.102")]
-[assembly: AssemblyFileVersion("1.1.5.102")]
+[assembly: AssemblyVersion("2.1.0.363")]
+[assembly: AssemblyFileVersion("2.1.0.363")]

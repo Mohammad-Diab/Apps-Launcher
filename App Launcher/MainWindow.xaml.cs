@@ -17,7 +17,6 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Shell;
 
 namespace App_Launcher
@@ -27,661 +26,850 @@ namespace App_Launcher
     /// </summary>
     public partial class MainWindow : Window
     {
-        List<int> n = new List<int>();
-        List<Key> Keys;
-        Key[] keys = { Key.Oem3, Key.Q, Key.W, Key.E, Key.R, Key.T, Key.Y, Key.U, Key.I, Key.O, Key.P, Key.OemOpenBrackets, Key.Oem6, Key.A, Key.S, Key.D, Key.F, Key.G, Key.H, Key.J, Key.K, Key.L, Key.Oem1, Key.OemQuotes, Key.Z, Key.X, Key.C, Key.V, Key.B, Key.N, Key.M, Key.OemComma, Key.OemPeriod, Key.OemQuestion };
-        string[] AR = { "ذ", "ض", "ص", "ث", "ق", "ف", "غ", "ع", "ه", "خ", "ح", "ج", "د", "ش", "س", "ي", "ب", "ل", "ا", "ت", "ن", "م", "ك", "ط", "ئ", "ء", "ؤ","ر", "لا", "ى", "ة", "و", "ز", "ظ", "ّ", "َ", "ً", "ُ", "ٌ", "لإ", "إ", "‘", "÷", "×", "؛", "<", ">", "ِ", "ٍ", "]", "[", "لأ", "أ", "ـ", "،", ":", "\"", "~", "ْ", "}", "{", "لآ", "آ", "’", ",", ".", "؟" };
-        string[] EN = { "`", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "~", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "{", "}", "A", "S", "D", "F", "G", "H", "J", "K", "L", ":", "\"", "Z", "X", "C", "V", "B", "N", "M", "<", ">", "?" };
-        List<AppElements> new_apps = new List<AppElements>();
-        List<string> windows_apps = new List<string>();
-        BackgroundWorker bw1;
-        bool fake = true;
-        bool inAction = false;
-        bool auto = false;
-        bool cancel_hide;
+        bool app_is_running, starting_window = true, close_window = false, in_action = false;
+        Dictionary<string, string> windows_apps;
+        long hide_after = long.MaxValue;
+        System.Windows.Forms.NotifyIcon ni;
         public MainWindow()
         {
-            //((Window)Process.GetProcesses()[0].MainWindowHandle).Show() ;
+            if (!AppList.SuccessfulStartUp)
+            {
+                Close();
+                return;
+            }
+
             InitializeComponent();
         }
 
-        //        private object myJumpList_JumpItemsRejected(object sender,JumpItemsRejectedEventArgs e)
-        //        {
-        //                                             handle myJumpList.JumpItemsRejected
-        //        foreach (var i  in e.RejectedItems)
-        //            Debug.WriteLine(CType(i, JumpTask).Title);
-        //        }
+        #region Hide and Show Application Window
 
-        //private Sub myJumpList_JumpItemsRemovedByUser(ByVal sender As Object, ByVal e As  _                                                 System.Windows.Shell.JumpItemsRemovedEventArgs)
-        //    {
-        //                                                  Handles myJumpList.JumpItemsRemovedByUser
-        //        foreach( element In e.RemovedItems
-        //            Debug.WriteLine(CType(element, JumpTask).Title)
-        //        Next
-        //        Debug.WriteLine(e.RemovedItems.Count)
-        //        }
-
-        private void Exit_Click(object sender, RoutedEventArgs e)
+        WindowVisibility state = WindowVisibility.Show;
+        WindowVisibility State
         {
-            Close();
-        }
-
-        private void Minimize_Click(object sender, RoutedEventArgs e)
-        {
-            WindowState = WindowState.Minimized;
-        }
-
-        private void ShowHide_Click(object sender, RoutedEventArgs e)
-        {
-            if (WindowStyle == WindowStyle.None)
+            get { return state; }
+            set
             {
-                WindowStyle = WindowStyle.SingleBorderWindow;
-                ((MenuItem)sender).IsChecked = false;
-                Properties.Settings.Default.HideTitlebar = false;
-            }
-            else
-            {
-                WindowStyle = WindowStyle.None;
-                ((MenuItem)sender).IsChecked = true;
-                Properties.Settings.Default.HideTitlebar = true;
-            }
-            Properties.Settings.Default.Save();
-        }
-
-        private void QuickAdd_Click(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog();
-            ofd.Filter = "Applications|*.exe";
-            ofd.Title = "Select an application to add";
-            ofd.Multiselect = true;
-            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                int compleated = 0;
-                string not_complete = "";
-                foreach (string i in ofd.FileNames)
-                    if (new FileInfo(i).Extension.ToLower().Equals(".exe"))
-                    {
-                        AppElements app = new AppElements(i.Substring(0, i.Length - 4), i, 0);
-                        if (!app.ExistedIn(OrginalList.orginal_list, -1))
-                        {
-                            ListViewItem item = new ListViewItem();
-                            item.Content = app.app_name;
-                            item.ToolTip = app.app_path;
-                            app_list.Items.Add(item);
-                            OrginalList.orginal_list.Add(app);
-                            compleated++;
-                        }
+                state = value;
+                switch (value)
+                {
+                    case WindowVisibility.Hide:
+                        if (AppList.Layout == HideLayout.HideToRight)
+                            MoveWindow(-ActualWidth, -ActualWidth + 20, true);
                         else
-                            not_complete = i;
-                    }
-                if (compleated < ofd.FileNames.Length)
-                    MessageBox.Show((ofd.FileNames.Length - compleated == 1 ? "This application \"" + not_complete + "\"" : "Some applications") + " is already existe in the list.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Asterisk);
-                string ex;
-                if (!OrginalList.SaveFile(out ex))
-                    MessageBox.Show(ex, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Stop);
-            }
-        }
-
-        private void Edit_Click(object sender, RoutedEventArgs e)
-        {
-            OrginalList.orginal_list = new EditApp().Show_Dialog();
-            string ex;
-            if (!OrginalList.SaveFile(out ex))
-                MessageBox.Show(ex, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Stop);
-            RebuildList(search.Text);
-        }
-
-        private void Search_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            TextBlock tmp;
-            if (((TextBox)sender) == search)
-                tmp = search_box_label;
-            else
-                tmp = run_label;
-            if (((TextBox)sender).Text.Equals(string.Empty))
-                tmp.Visibility = Visibility.Visible;
-            else
-                tmp.Visibility = Visibility.Collapsed;
-            if (((TextBox)sender) == search)
-                RebuildList(search.Text);
-            else
-                AutoCompleate(run.Text);
-        }
-
-        private void AutoCompleate(string p)
-        {
-            if (!auto)
-            {
-                auto = true;
-                int i;
-                if (p.Length > 1 && !p.Contains('\\') && !p.Contains(':'))
-                    foreach (var pro in windows_apps)
-                    {
-                        if (pro.Length < p.Length)
-                            continue;
-                        for (i = 0; i < p.Length; i++)
-                            if (pro[i] != p[i])
-                                break;
-                        if (i == p.Length)
-                        {
-                            run.Text = pro;
-                            //run.CaretIndex = p.Length;
-                            run.Select(p.Length, pro.Length - p.Length);
-                            break;
-                        }
-                    }
-                auto = false;
-            }
-        }
-
-        private void RebuildList(string p)
-        {
-            app_list.Items.Clear();
-            new_apps.Clear();
-            foreach (AppElements i in OrginalList.orginal_list)
-                if (i.app_name.ToLower().Contains(p.ToLower()) || i.app_path.ToLower().Contains(p.ToLower()))
-                    new_apps.Add(i);
-            new_apps.Sort();
-            foreach (AppElements i in new_apps)
-            {
-                ListBoxItem item = new ListBoxItem();
-                item.Content = i.app_name;
-                item.ToolTip = i.app_path;
-                item.TabIndex = i.priority;
-                item.ContextMenu = new ContextMenu();
-                item.ContextMenuOpening += CreateContextMenu;
-                item.MouseDoubleClick += Item_MouseDoubleClick;
-                app_list.Items.Insert(0, item);
-            }
-        }
-
-        private void Item_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            int index = app_list.Items.IndexOf((ListBoxItem)sender);
-            try
-            {
-                Process.Start(new_apps[app_list.Items.Count - 1 - index].app_path);
-                new_apps[app_list.Items.Count - 1 - index].last_used = DateTime.Now;
-                new_apps[app_list.Items.Count - 1 - index].used_times++;
-            }
-            catch (Exception ex)
-            { MessageBox.Show(ex.Message, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Stop); }
-        }
-
-        private void CreateContextMenu(object sender, ContextMenuEventArgs e)
-        {
-            ContextMenu app_context_menu = ((ListBoxItem)sender).ContextMenu;
-            if (app_context_menu.Items.Count == 0)
-            {
-                app_context_menu.Tag = ((ListBoxItem)sender).Content.ToString();
-                app_context_menu.TabIndex = ((ListBoxItem)sender).TabIndex;
-                app_context_menu.ItemStringFormat = ((ListBoxItem)sender).ToolTip.ToString();
-                MenuItem menu_item = new MenuItem();
-                menu_item.Header = "Start";
-                menu_item.Icon = new Image();
-                try
-                {
-                    if (File.Exists(((ListBoxItem)sender).ToolTip.ToString()))
-                        ((Image)menu_item.Icon).Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(((ListBoxItem)sender).ToolTip.ToString()).Handle, System.Windows.Int32Rect.Empty, System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
-                    else
-                        ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/no_icon.png"));
-                }
-                catch (Exception) { ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/no_icon.png")); }
-                menu_item.Click += Open_Click;
-                app_context_menu.Items.Add(menu_item);
-                menu_item = new MenuItem();
-                menu_item.Header = "Run as administartor";
-                menu_item.Icon = new Image();
-                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/run-as-adimstrator.png"));
-                menu_item.Click += RunAsAdmin_Click;
-                app_context_menu.Items.Add(menu_item);
-                app_context_menu.Items.Add(new Separator());
-                menu_item = new MenuItem();
-                menu_item.Header = "Edit this application";
-                menu_item.Icon = new Image();
-                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/edit-app.png"));
-                menu_item.Click += EditApp_Click;
-                app_context_menu.Items.Add(menu_item);
-                menu_item = new MenuItem();
-                menu_item.Header = "Delete";
-                menu_item.Icon = new Image();
-                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/delete-app.png"));
-                menu_item.Click += DeleteApp_Click;
-                app_context_menu.Items.Add(menu_item);
-                app_context_menu.Items.Add(new Separator());
-                menu_item = new MenuItem();
-                menu_item.Header = "Open directory";
-                menu_item.Icon = new Image();
-                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/directory.png"));
-                menu_item.Click += OpenDirectory_Click;
-                app_context_menu.Items.Add(menu_item);
-                menu_item = new MenuItem();
-                menu_item.Header = "Copy file path";
-                menu_item.Icon = new Image();
-                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/path.png"));
-                menu_item.Click += CopyFilePath_Click;
-                app_context_menu.Items.Add(menu_item);
-                menu_item = new MenuItem();
-                menu_item.Header = "Copy directory path";
-                menu_item.Icon = new Image();
-                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/directory_path.png"));
-                menu_item.Click += CopyDirectoryPath_Click;
-                app_context_menu.Items.Add(menu_item);
-            }
-        }
-
-        private void DeleteApp_Click(object sender, RoutedEventArgs e)
-        {
-            if (MessageBox.Show("Do you want to delete this app?", "App Launcher", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-            {
-                int index = 0;
-                ContextMenu cont = (ContextMenu)((MenuItem)sender).Parent;
-                while (!cont.ItemStringFormat.Equals(OrginalList.orginal_list[index].app_path) && index < OrginalList.orginal_list.Count)
-                    index++;
-                OrginalList.orginal_list.RemoveAt(index);
-                RebuildList(search.Text);
-            }
-        }
-
-        private void CopyDirectoryPath_Click(object sender, RoutedEventArgs e)
-        {
-            Clipboard.SetText(new FileInfo(((ContextMenu)((MenuItem)sender).Parent).ItemStringFormat).Directory.FullName);
-        }
-
-        private void CopyFilePath_Click(object sender, RoutedEventArgs e)
-        {
-            Clipboard.SetText(new FileInfo(((ContextMenu)((MenuItem)sender).Parent).ItemStringFormat).FullName);
-        }
-
-        private void EditApp_Click(object sender, RoutedEventArgs e)
-        {
-            bool OK;
-            ContextMenu cont = (ContextMenu)((MenuItem)sender).Parent;
-            AppElements app = new AddAPP().Show_Dialog(new AppElements(cont.Tag.ToString(), cont.ItemStringFormat, cont.TabIndex), out OK);
-            if (OK)
-            {
-                int index = 0;
-                while (!cont.ItemStringFormat.Equals(OrginalList.orginal_list[index].app_path) && index < OrginalList.orginal_list.Count)
-                    index++;
-                int new_index = 0;
-                while (!cont.ItemStringFormat.Equals(new_apps[new_index].app_path) && new_index < OrginalList.orginal_list.Count)
-                    new_index++;
-                new_index = new_apps.Count - new_index;
-                if (!app.ExistedIn(OrginalList.orginal_list, index))
-                {
-                    OrginalList.orginal_list[index].app_name = app.app_name;
-                    OrginalList.orginal_list[index].app_path = app.app_path;
-                    OrginalList.orginal_list[index].priority = app.priority;
-                    ((ListBoxItem)app_list.SelectedItem).ContextMenu = new ContextMenu();
-                    RebuildList(search.Text);
-                    while (new_index < 0)
-                        new_index++;
-                    while (new_index > app_list.Items.Count - 1)
-                        new_index--;
-                    app_list.ScrollIntoView(app_list.Items[new_index]);
-                }
-                else
-                    MessageBox.Show("This application is already existe in the list", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Asterisk);
-            }
-        }
-
-        private void OpenDirectory_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            { Process.Start(new FileInfo(((ContextMenu)((MenuItem)sender).Parent).ItemStringFormat).Directory.FullName); }
-            catch (Exception ex) { MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
-        }
-
-        private void RunAsAdmin_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                int index = -1;
-                for (int i = 0; i < app_list.Items.Count; i++)
-                    if (((ListBoxItem)app_list.Items[i]).ContextMenu == (ContextMenu)((MenuItem)sender).Parent)
-                    {
-                        index = i;
+                            MoveWindow(SystemParameters.PrimaryScreenWidth, Left + ActualWidth - 20, true);
+                        OpenMenu = false;
                         break;
-                    }
-                ProcessStartInfo ps = new ProcessStartInfo(new_apps[app_list.Items.Count - index - 1].app_path);
-                ps.Verb = "runas";
-                Process.Start(ps);
-                new_apps[app_list.Items.Count - index - 1].last_used = DateTime.Now;
-                new_apps[app_list.Items.Count - index - 1].used_times++;
-            }
-            catch (Exception ex)
-            { MessageBox.Show(ex.Message, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Stop); }
-        }
-
-        private void Open_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                int index = -1;
-                for (int i = 0; i < app_list.Items.Count; i++)
-                    if (((ListBoxItem)app_list.Items[i]).ContextMenu == (ContextMenu)((MenuItem)sender).Parent)
-                    {
-                        index = i;
+                    case WindowVisibility.Show:
+                        if (AppList.Layout == HideLayout.HideToRight)
+                            MoveWindow(-5, 0, false);
+                        else
+                            MoveWindow(SystemParameters.PrimaryScreenWidth - ActualWidth + 5, 0, false);
+                        if (WindowState == WindowState.Minimized)
+                            WindowState = WindowState.Normal;
+                        Activate();
                         break;
-                    }
-                Process.Start(new_apps[app_list.Items.Count - index - 1].app_path);
-                new_apps[app_list.Items.Count - index - 1].last_used = DateTime.Now;
-                new_apps[app_list.Items.Count - index - 1].used_times++;
+                    case WindowVisibility.Visible:
+                        Show();
+                        State = WindowVisibility.Show;
+                        break;
+                    case WindowVisibility.UnVisible:
+                        State = WindowVisibility.Hide;
+                        Hide();
+                        break;
+                }
             }
-            catch (Exception ex)
-            { MessageBox.Show(ex.Message, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Stop); }
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void MoveWindow(double left1, double left2, bool two_stages)
         {
-            Keys = keys.ToList<Key>();
-            DirectoryInfo system = new DirectoryInfo(Environment.SystemDirectory);
-            DirectoryInfo windows = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.Windows));
-            FileInfo[] win_pro = windows.GetFiles("*.exe");
-            FileInfo[] sys_pro = system.GetFiles("*.exe");
-            foreach (var i in win_pro)
-                windows_apps.Add(i.Name.Remove(i.Name.Length - 4));
-            foreach (var i in sys_pro)
-                windows_apps.Add(i.Name.Remove(i.Name.Length - 4));
-            Width = Properties.Settings.Default.Width;
-            Height = Properties.Settings.Default.Height;
-            Left = Properties.Settings.Default.Xpos;
-            Top = Properties.Settings.Default.Ypos;
-            if (Properties.Settings.Default.HideTitlebar)
-            {
-                WindowStyle = WindowStyle.None;
-                show.IsChecked = true;
-            }
-            else
-                show.IsChecked = false;
-            OrginalList.orginal_list = new List<AppElements>();
+            in_action = true;
             try
+            { BeginAnimation(LeftProperty, new DoubleAnimation(left1, new Duration(new TimeSpan(0, 0, 0, 0, 150)))); }
+            catch (Exception) { }
+            if (two_stages)
             {
-                if (!Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher"))
-                    Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher");
-                if (!File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist"))
-                    File.Create(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist");
-                else
+                BackgroundWorker bw = new BackgroundWorker();
+                bw.DoWork += (object sender, DoWorkEventArgs args) => { Thread.Sleep(200); };
+                bw.RunWorkerCompleted += (object sender, RunWorkerCompletedEventArgs args) =>
                 {
-                    Stream stream = File.OpenRead(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist");
-                    if (stream.ReadByte() == 12 && stream.ReadByte() == 21 && stream.ReadByte() == 14 && stream.ReadByte() == 1 && stream.ReadByte() == 38 && stream.ReadByte() == 77 && stream.ReadByte() == 65)
-                    {
-                        BinaryFormatter bf = new BinaryFormatter();
-                        OrginalList.orginal_list = (List<AppElements>)bf.Deserialize(stream);
-                        stream.Close();
-                        RebuildList(search.Text);
-                    }
-                }
+                    if (!close_window)
+                        try { BeginAnimation(LeftProperty, new DoubleAnimation(left2, new Duration(new TimeSpan(0, 0, 0, 0, 75)))); }
+                        catch (Exception) { }
+                };
+                bw.RunWorkerAsync();
             }
-            catch (Exception ex) { MessageBox.Show("Something happened\n\r" + ex, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Stop); }
-            search.Focus();
-            fake = false;
+            in_action = false;
         }
 
-        private void About_Click(object sender, RoutedEventArgs e)
+        private void Window_Deactivated(object sender, EventArgs e)
         {
-            new About().ShowDialog();
+            hide_after = 0;
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Window_MouseEnter(object sender, MouseEventArgs e)
         {
-            string ex;
-            if (!OrginalList.SaveFile(out ex))
-                MessageBox.Show(ex, "Error while saving application list", MessageBoxButton.OK, MessageBoxImage.Stop);
-            //e.Cancel = true;
-            WindowState = WindowState.Minimized;
-
-            //Hide();
-        }
-
-        private void search_PreviewKeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
+            if (State == WindowVisibility.Hide)
             {
-                if (app_list.Items.Count > 0)
-                {
-                    try
-                    {
-                        Process.Start(new_apps[new_apps.Count - 1].app_path);
-                        new_apps[new_apps.Count - 1].last_used = DateTime.Now;
-                        new_apps[new_apps.Count - 1].used_times++;
-                    }
-                    catch (Exception ex)
-                    { MessageBox.Show(ex.Message, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Error); }
-                }
+                search.Focus();
+                State = WindowVisibility.Show;
             }
-            if (search.Text.Equals(string.Empty))
-                n.Clear();
+            hide_after = long.MaxValue;
         }
 
-        private void Window_LocationChanged(object sender, EventArgs e)
+        private void Window_MouseLeave(object sender, MouseEventArgs e)
         {
-            if (!fake)
-            {
-                Properties.Settings.Default.Xpos = Left;
-                Properties.Settings.Default.Ypos = Top;
-            }
+            hide_after = 3000;
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (!fake)
+            if (OpenMenu)
+                OpenMenu = false;
+            if (!starting_window && WindowState == WindowState.Normal && !in_action)
             {
                 Properties.Settings.Default.Width = Width;
                 Properties.Settings.Default.Height = Height;
             }
         }
 
-        private void Check_Click(object sender, RoutedEventArgs e)
+        private void Window_LocationChanged(object sender, EventArgs e)
         {
-            List<AppElements> deleted = new List<AppElements>();
-            foreach (var i in OrginalList.orginal_list)
-                if (!File.Exists(i.app_path))
-                    deleted.Add(i);
-            if (deleted.Count > 0)
+            if (!starting_window && !in_action)
             {
-                StringBuilder st = new StringBuilder("These app has been deleted:\n\r");
-                foreach (AppElements i in deleted)
+                Properties.Settings.Default.Xpos = Left;
+                Properties.Settings.Default.Ypos = Top;
+            }
+        }
+
+        #endregion
+
+        #region MainMenu
+
+        bool open_menu= false;
+        bool OpenMenu
+        {
+            get { return open_menu; }
+            set
+            {
+                if (!close_window)
                 {
-                    OrginalList.orginal_list.Remove(i);
-                    st.Append(i.app_path);
-                    st.Append("\n\r");
-                }
-                RebuildList(search.Text);
-                string ex;
-                OrginalList.SaveFile(out ex);
-                MessageBox.Show(st.ToString(), "App Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-                MessageBox.Show("Done", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        private void Run_PreviewKeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                if (app_list.Items.Count > 0)
-                {
-                    try
-                    { Process.Start(run.Text); }
-                    catch (Exception ex) { MessageBox.Show(ex.Message, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Error); }
-                }
-            }
-
-        }
-
-        private void Browser_Click(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog();
-            ofd.Filter = "Applications|*.exe";
-            ofd.Title = "Select an application to run";
-            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK && new FileInfo(ofd.FileName).Extension.ToLower().Equals(".exe"))
-            {
-                run.Text = ofd.FileName;
-                try
-                { Process.Start(run.Text); }
-                catch (Exception ex) { MessageBox.Show(ex.Message, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Error); }
-            }
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            search.Clear();
-            n.Clear();
-        }
-
-        private void search_PreviewKeydown(object sender, KeyEventArgs e)
-        {
-            if (e.Key >= Key.A && e.Key <= Key.Z)
-                if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
-                    if (Keyboard.IsKeyToggled(Key.CapsLock))
-                        n.Add(Keys.IndexOf(e.Key));
-                    else
-                        n.Add(Keys.IndexOf(e.Key) + 34);
-                else
-                    if (Keyboard.IsKeyToggled(Key.CapsLock))
-                        n.Add(Keys.IndexOf(e.Key) + 34);
-                    else
-                        n.Add(Keys.IndexOf(e.Key));
-            else if (e.Key >= Key.Oem3 || e.Key >= Key.OemOpenBrackets || e.Key >= Key.Oem6 || e.Key >= Key.Oem1 || e.Key >= Key.OemQuotes || e.Key >= Key.OemComma || e.Key >= Key.OemPeriod || e.Key >= Key.OemQuestion)
-                n.Add(Keys.IndexOf(e.Key));
-            else if (e.Key.Equals(Key.Back) && n.Count > 0 && search.Text.Length > 1)
-                n.RemoveAt(search.CaretIndex < search.Text.Length ? search.CaretIndex : search.Text.Length - 1 > n.Count ? 0 : search.Text.Length - 1);
-            else if (e.Key.Equals(Key.Delete) && n.Count > 1 && search.CaretIndex > 1 && search.Text.Length > 1)
-                n.RemoveAt(search.CaretIndex < search.Text.Length ? search.CaretIndex - 1 : search.Text.Length - 1 > n.Count ? 0 : search.Text.Length - 1);
-        }
-
-        private void SwicthLanguage_Click(object sender, RoutedEventArgs e)
-        {
-            StringBuilder st_ar = new StringBuilder();
-            StringBuilder st_en = new StringBuilder();
-            foreach (int i in n)
-            {
-                st_ar.Append(AR[i]);
-                st_en.Append(EN[i]);
-            }
-            if (st_ar.ToString().Equals(search.Text))
-                search.Text = (st_en.ToString());
-            else if (st_en.ToString().Equals(search.Text))
-                search.Text = (st_ar.ToString());
-            else
-            {
-                List<string> ar_list=AR.ToList<string>();
-                List<string> en_list=EN.ToList<string>();
-                string search_text = search.Text;
-                List<int> search_index = new List<int>();
-                StringBuilder new_search_text=new StringBuilder();
-                foreach (char i in search_text)
-                {
-                    int ar_index=ar_list.IndexOf(i.ToString());
-                    int en_index = -1;
-                    if (ar_index > -1)
-                        new_search_text.Append(EN[ar_index]);
+                    if (value)
+                    {
+                        main_menu.Margin = new Thickness(0, -100, 0, 0);
+                        main_menu.Opacity = 0;
+                        main_menu_grid.Visibility = Visibility.Visible;
+                        DoubleAnimation da = new DoubleAnimation(1, new Duration(new TimeSpan(0, 0, 0, 0, 150)));
+                        ThicknessAnimation ta = new ThicknessAnimation(new Thickness(0), new Duration(new TimeSpan(0, 0, 0, 0, 150)));
+                        ThicknessAnimation ta1 = new ThicknessAnimation(new Thickness(0, -40, 0, 0), new Duration(new TimeSpan(0, 0, 0, 0, 75)));
+                        ta1.Completed += (object sender, EventArgs arg) =>
+                        {
+                            ThicknessAnimation ta2 = new ThicknessAnimation(new Thickness(11, -40, 0, 0), new Duration(new TimeSpan(0, 0, 0, 0, 75)));
+                            ta2.Completed += (object sender2, EventArgs arg2) =>
+                            {
+                                ThicknessAnimation ta3 = new ThicknessAnimation(new Thickness(22, -40, 0, 0), new Duration(new TimeSpan(0, 0, 0, 0, 75)));
+                                ta3.Completed += (object sender3, EventArgs arg3) =>
+                                {
+                                    DoubleAnimation da1 = new DoubleAnimation(0, new Duration(new TimeSpan(0, 0, 0, 0, 60)));
+                                    da1.Completed += (object sender4, EventArgs arg4) => { img_grid.Visibility = Visibility.Collapsed; };
+                                    if (!close_window)
+                                        img_grid.BeginAnimation(HeightProperty, da1);
+                                    img3.Visibility = Visibility.Collapsed;
+                                    img4.Visibility = Visibility.Visible;
+                                };
+                                if (!close_window)
+                                    img3.BeginAnimation(MarginProperty, ta3);
+                                img2.Visibility = Visibility.Collapsed;
+                            };
+                            if (!close_window)
+                                img2.BeginAnimation(MarginProperty, ta2);
+                            img1.Visibility = Visibility.Collapsed;
+                        };
+                        if (!close_window)
+                        {
+                            img1.BeginAnimation(MarginProperty, ta1);
+                            main_menu.BeginAnimation(MarginProperty, ta);
+                            main_menu.BeginAnimation(OpacityProperty, da);
+                        }
+                    }
                     else
                     {
-                        en_index = en_list.IndexOf(i.ToString());
-                        new_search_text.Append(AR[en_index]);
+                        DoubleAnimation da = new DoubleAnimation(0, new Duration(new TimeSpan(0, 0, 0, 0, 150)));
+                        ThicknessAnimation ta = new ThicknessAnimation(new Thickness(0, -100, 0, 0), new Duration(new TimeSpan(0, 0, 0, 0, 150)));
+                        da.Completed += (object sender, EventArgs e) => { main_menu_grid.Visibility = Visibility.Collapsed; };
+                        DoubleAnimation da1 = new DoubleAnimation(25, new Duration(new TimeSpan(0, 0, 0, 0, 60)));
+                        da1.Completed += (object sender4, EventArgs arg4) =>
+                        {
+                            ThicknessAnimation ta3 = new ThicknessAnimation(new Thickness(22, 0, 0, 0), new Duration(new TimeSpan(0, 0, 0, 0, 75)));
+                            ta3.Completed += (object sender, EventArgs arg) =>
+                            {
+                                ThicknessAnimation ta2 = new ThicknessAnimation(new Thickness(11, 0, 0, 0), new Duration(new TimeSpan(0, 0, 0, 0, 75)));
+                                ta2.Completed += (object sender2, EventArgs arg2) =>
+                                {
+                                    ThicknessAnimation ta1 = new ThicknessAnimation(new Thickness(0, 0, 0, 0), new Duration(new TimeSpan(0, 0, 0, 0, 75)));
+                                    img1.Visibility = Visibility.Visible;
+                                    img1.BeginAnimation(MarginProperty, ta1);
+                                };
+                                img2.Visibility = Visibility.Visible;
+                                img2.BeginAnimation(MarginProperty, ta2);
+                            };
+                            img3.Visibility = Visibility.Visible;
+                            img3.BeginAnimation(MarginProperty, ta3);
+                        };
+                        img_grid.Visibility = Visibility.Visible;
+                        img_grid.BeginAnimation(HeightProperty, da1);
+                        main_menu.BeginAnimation(MarginProperty, ta);
+                        main_menu.BeginAnimation(OpacityProperty, da);
                     }
                 }
-                search.Text = new_search_text.ToString();
+                open_menu = value;
             }
         }
 
-        private void Window_MouseLeave(object sender, MouseEventArgs e)
+        private void MenuBtm_Click(object sender, RoutedEventArgs e)
         {
-            cancel_hide = false;
-            bw1 = new BackgroundWorker();
-            bw1.DoWork += bw1_DoWork;
-            bw1.WorkerSupportsCancellation = true;
-            bw1.WorkerReportsProgress = true;
-            bw1.ProgressChanged += bw1_ProgressChanged;
-            bw1.RunWorkerAsync();
+            OpenMenu = !OpenMenu;
         }
 
-        private void bw1_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void AddApplication_Click(object sender, RoutedEventArgs e)
         {
-            if (Left > -10 && !inAction)
+            string error;
+            if (!Applications.AddApplication(out error))
+                MessageBox.Show(error, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        private void Edit_Click(object sender, RoutedEventArgs e)
+        {
+            OpenMenu = false;
+            EditApp.EditList();
+            //RebuildList(search.Text);
+        }
+
+        private void RestoreList_Click(object sender, RoutedEventArgs e)
+        {
+            OpenMenu = false;
+            var ofd = new System.Windows.Forms.OpenFileDialog();
+            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                inAction = true;
-                //DoubleAnimation animation = new DoubleAnimation((-1) * ActualWidth, new Duration(new TimeSpan(1500000))); //arabic Layout
-                DoubleAnimation animation = new DoubleAnimation(SystemParameters.PrimaryScreenWidth, new Duration(new TimeSpan(1500000))); //english
-                BeginAnimation(LeftProperty, animation);
-                BackgroundWorker bw = new BackgroundWorker();
-                bw.DoWork += bw_DoWork;
-                bw.RunWorkerCompleted += bw_RunWorkerCompleted;
-                bw.RunWorkerAsync();
+                string err;
+                if (!AppList.LoadFile(ofd.FileName, out err))
+                    MessageBox.Show(err, "App launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+                AppList.ListHasChanged = true;
             }
         }
 
-        private void bw1_DoWork(object sender, DoWorkEventArgs e)
+        private void BackupList_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 50; i++)
+            OpenMenu = false;
+            var sfd = new System.Windows.Forms.SaveFileDialog();
+            if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                Thread.Sleep(20);
-                if (cancel_hide)
-                    break;
+                string err;
+                if (!AppList.SaveFile(sfd.FileName, out err))
+                    MessageBox.Show(err, "App launcher", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            if (!cancel_hide)
-                bw1.ReportProgress(10);
         }
 
-        private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void Check_Click(object sender, RoutedEventArgs e)
         {
-            //DoubleAnimation animation = new DoubleAnimation(Left + 15, new Duration(new TimeSpan(750000))); //arabic Layout
-            DoubleAnimation animation = new DoubleAnimation(Left - 15, new Duration(new TimeSpan(750000))); //english Layout
-            BeginAnimation(LeftProperty, animation);
-            BackgroundWorker bw = new BackgroundWorker();
-            bw.DoWork += bw2_DoWork;
-            bw.RunWorkerAsync(150);
-        }
-
-        private void bw2_DoWork(object sender, DoWorkEventArgs e)
-        {
-            Thread.Sleep((int)e.Argument);
-            inAction = false;
-        }
-
-        void bw_DoWork(object sender, DoWorkEventArgs e)
-        {
-            Thread.Sleep(200);
-        }
-
-        private void Window_MouseEnter(object sender, MouseEventArgs e)
-        {
-            if (bw1 != null && bw1.IsBusy)
-                bw1.CancelAsync();
-            if (!inAction)
+            OpenMenu = false;
+            List<string> to_delete = new List<string>();
+            for (int i = 0; i < AppList.List.Count; i++)
+                if (!File.Exists(AppList.List[i].Location))
+                    to_delete.Add(AppList.List[i].Location);
+            if (to_delete.Count > 0)
             {
-                //if(Left<-4) arabic
-                if (Left < SystemParameters.PrimaryScreenWidth - 5)
+                StringBuilder st = new StringBuilder("These app has been deleted:\n");
+                string err;
+                foreach (string i in to_delete)
                 {
-                    Focus();
-                    inAction = true;
-                    //DoubleAnimation animation = new DoubleAnimation(-5, new Duration(new TimeSpan(2500000))); //arabic
-                    DoubleAnimation animation = new DoubleAnimation(SystemParameters.PrimaryScreenWidth - ActualWidth + 5, new Duration(new TimeSpan(2500000))); //english
-                    BeginAnimation(LeftProperty, animation);
-                    BackgroundWorker bw = new BackgroundWorker();
-                    bw.DoWork += bw2_DoWork;
-                    bw.RunWorkerAsync(350);
+                    if (AppList.RemoveItem(i, out err))
+                        st.Append(i + "\n");
                 }
-                cancel_hide = true;
+                //RebuildList(search.Text);
+                //string ex;
+                //OrginalList.SaveFile(out ex);
+                MessageBox.Show(st.ToString(), "App launcher", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+            else
+                MessageBox.Show("Done", "App launcher", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private void Window_Deactivated(object sender, EventArgs e)
+        private void Option_Click(object sender, RoutedEventArgs e)
         {
-            if (Left > SystemParameters.PrimaryScreenWidth - ActualWidth && !inAction)
-            //if (Left > -10 && !inAction)  arabic
+            OpenMenu = false;
+            new Options().ShowDialog();
+        }
+
+        private void About_Click(object sender, RoutedEventArgs e)
+        {
+            OpenMenu = false;
+            new About().ShowDialog();
+        }
+
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            OpenMenu = false;
+            close_window = true;
+            Close();
+        }
+
+        private void Minimize_Click(object sender, RoutedEventArgs e)
+        {
+            OpenMenu = false;
+            WindowState = WindowState.Minimized;
+        }
+
+        private void ShowHide_Click(object sender, RoutedEventArgs e)
+        {
+            OpenMenu = false;
+            if (WindowStyle == WindowStyle.None)
             {
-                inAction = true;
-                //DoubleAnimation animation = new DoubleAnimation((-1) * ActualWidth, new Duration(new TimeSpan(1500000))); //arabic Layout
-                DoubleAnimation animation = new DoubleAnimation(SystemParameters.PrimaryScreenWidth, new Duration(new TimeSpan(1500000))); //english
-                BeginAnimation(LeftProperty, animation);
+                WindowStyle = WindowStyle.SingleBorderWindow;
+                showtitle_img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/hide-titlebar.png"));
+                Properties.Settings.Default.HideTitlebar = false;
+            }
+            else
+            {
+                WindowStyle = WindowStyle.None;
+                showtitle_img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/hide-titlebar-tick.png"));
+                Properties.Settings.Default.HideTitlebar = true;
+            }
+            Properties.Settings.Default.Save();
+        }
+
+        private void Grid_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            OpenMenu = false;
+        }
+
+        #endregion
+
+        #region Search Engine
+
+        private void Search_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                if (app_list.Items.Count > 1)
+                    StartApplication(((ListBoxItem)app_list.Items[1]).ToolTip.ToString(), false);
+        }
+
+        private List<AppItem> SortList(string search)
+        {
+            search = search.ToLower();
+            List<AppItem> list = new List<AppItem>();
+            if (AppList.List != null)
+            {
+                foreach (var i in AppList.List)
+                    if (i.AppName.ToLower().Contains(search) || Path.GetDirectoryName(i.Location.ToLower()).Contains(search))
+                        list.Add(i);
+            }
+            foreach (var i in list)
+                i.CalcPoint(search);
+            list.Sort();
+
+            if (windows_apps.ContainsKey(search.ToLower()))
+                list.Insert(0, new AppItem(search, windows_apps[search.ToLower()], 18) { point = 1000 });
+
+            if (list.Count > 10)
+                return list.GetRange(0, 10);
+            else
+                return list;
+        }
+
+        private void Search_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string search_word = search.Text;
+            if (search_word == string.Empty)
+            {
+                searchbox_placeholder.Visibility = Visibility.Visible;
+                clear_text.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                searchbox_placeholder.Visibility = Visibility.Collapsed;
+                clear_text.Visibility = Visibility.Visible;
+            }
+
+            if (search_word == "")
+                ViewItems(SortList(""), false);
+            else
+            {
                 BackgroundWorker bw = new BackgroundWorker();
-                bw.DoWork += bw_DoWork;
-                bw.RunWorkerCompleted += bw_RunWorkerCompleted;
+                bw.DoWork += (object obj, DoWorkEventArgs args) =>
+                {
+                    Thread.Sleep(500);
+                };
+                bw.RunWorkerCompleted += (object obj, RunWorkerCompletedEventArgs args) =>
+                {
+                    if (search_word == search.Text)
+                        ViewItems(SortList(search.Text), search_word != "");
+                };
                 bw.RunWorkerAsync();
             }
         }
+
+        #endregion
+
+        #region Apperance
+
+        ListViewItem CreateHeader(string text)
+        {
+            ListViewItem it = new ListViewItem();
+            it.IsEnabled = false;
+            it.Content = text;
+            return it;
+        }
+
+        ListViewItem CreateBigItem(string name, string info, string app_path)
+        {
+            TextBlock tb1 = new TextBlock();
+            tb1.Text = name;
+            tb1.Margin = new Thickness(69, 5, 0, 0);
+            tb1.HorizontalAlignment = HorizontalAlignment.Left;
+            tb1.VerticalAlignment = VerticalAlignment.Top;
+            tb1.FontSize = 16;
+            tb1.TextTrimming = TextTrimming.CharacterEllipsis;
+            tb1.Foreground = Brushes.Black;
+
+            TextBlock tb2 = new TextBlock();
+            tb2.Text = info;
+            tb2.Margin = new Thickness(69, 31, 0, 0);
+            tb2.HorizontalAlignment = HorizontalAlignment.Left;
+            tb2.VerticalAlignment = VerticalAlignment.Top;
+            tb2.FontSize = 14;
+            tb2.TextTrimming = TextTrimming.CharacterEllipsis;
+            tb2.Foreground = Brushes.Gray;
+
+            Image img = new Image();
+            img.Source = Applications.GetImage(app_path, 64);
+            img.Margin = new Thickness(8, 8, 0, 0);
+            img.Width = 48;
+            img.Height = 48;
+            img.HorizontalAlignment = HorizontalAlignment.Left;
+            img.VerticalAlignment = VerticalAlignment.Top;
+
+            Grid gr = new Grid();
+            gr.Height = 64;
+            gr.Children.Add(img);
+            gr.Children.Add(tb1);
+            gr.Children.Add(tb2);
+
+            ListViewItem it = new ListViewItem();
+            it.Content = gr;
+            it.ToolTip = app_path;
+            it.ContextMenu = new ContextMenu();
+            it.MouseDoubleClick += (object sender, MouseButtonEventArgs arg) => { StartApplication(app_path, false); };
+            it.ContextMenuOpening += (object sender, ContextMenuEventArgs arg) => { CreateContextMenu((ListBoxItem)sender, app_path); };
+            return it;
+        }
+
+        ListViewItem CreateSmallItem(string name, string app_path)
+        {
+            TextBlock tb1 = new TextBlock();
+            tb1.Text = name;
+            tb1.Margin = new Thickness(37, 5, 0, 0);
+            tb1.HorizontalAlignment = HorizontalAlignment.Left;
+            tb1.VerticalAlignment = VerticalAlignment.Top;
+            tb1.FontSize = 16;
+            tb1.TextTrimming = TextTrimming.CharacterEllipsis;
+            tb1.Foreground = Brushes.Black;
+
+            Image img = new Image();
+            img.Source = Applications.GetImage(app_path, 32);
+            img.Width = 32;
+            img.HorizontalAlignment = HorizontalAlignment.Left;
+
+            Grid gr = new Grid();
+            gr.Height = 32;
+            gr.Children.Add(img);
+            gr.Children.Add(tb1);
+
+            ListViewItem it = new ListViewItem();
+            it.Content = gr;
+            it.ToolTip = app_path;
+            it.ContextMenu = new ContextMenu();
+            it.MouseDoubleClick += (object sender, MouseButtonEventArgs arg) => { StartApplication(app_path, false); };
+            it.ContextMenuOpening += (object sender, ContextMenuEventArgs arg) => { CreateContextMenu((ListBoxItem)sender, app_path); };
+            return it;
+        }
+
+        private void ViewItems(List<AppItem> list, bool IsSearch)
+        {
+            app_list.Items.Clear();
+            if (list.Count == 0)
+            {
+                app_list.Items.Add(CreateHeader(IsSearch ? "No APP match your search." : "There is no apps in the list."));
+            }
+            else
+            {
+                int i = 0;
+                if (list[0].point > 650 | list.Count == 1)
+                {
+                    app_list.Items.Add(CreateHeader(IsSearch ? "Best match" : "Top application"));
+                    app_list.Items.Add(CreateBigItem(list[0].AppName, list[0].Priority > 9 ? "Command" : "Application", list[0].Location));
+                    i++;
+                }
+                if (list.Count > 1 && list[1].point > 650)
+                {
+                    app_list.Items.Add(CreateBigItem(list[1].AppName, "Application", list[1].Location));
+                    i++;
+                }
+                if (i < list.Count)
+                    app_list.Items.Add(CreateHeader(IsSearch ? "Results" : "Applications"));
+                for (; i < list.Count; i++)
+                    app_list.Items.Add(CreateSmallItem(list[i].AppName, list[i].Location));
+            }
+        }
+
+        private void CreateContextMenu(ListBoxItem app, string app_path)
+        {
+            bool is_application = AppList.Dictionary.ContainsKey(app_path.ToLower());
+            ContextMenu app_context_menu = (app).ContextMenu;
+            if (app_context_menu.Items.Count == 0)
+            {
+                MenuItem menu_item = new MenuItem();
+                menu_item.Header = "Start";
+                menu_item.Icon = new Image();
+                ((Image)menu_item.Icon).Source = Applications.GetImage(app_path, 16);
+                menu_item.Click += (object sender, RoutedEventArgs e) => { StartApplication(app_path, false); };
+                app_context_menu.Items.Add(menu_item);
+
+                menu_item = new MenuItem();
+                menu_item.Header = "Run as administartor";
+                menu_item.Icon = new Image();
+                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/run-as-adimstrator.png"));
+                menu_item.Click += (object sender, RoutedEventArgs e) => { StartApplication(app_path, true); };
+                app_context_menu.Items.Add(menu_item);
+
+                app_context_menu.Items.Add(new Separator());
+
+                if (is_application)
+                {
+                    menu_item = new MenuItem();
+                    menu_item.Header = "Edit this application";
+                    menu_item.Icon = new Image();
+                    ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/edit-app.png"));
+                    menu_item.Click += (object sender, RoutedEventArgs e) => { EditApplication(app_path); };
+                    app_context_menu.Items.Add(menu_item);
+
+                    menu_item = new MenuItem();
+                    menu_item.Header = "Delete";
+                    menu_item.Icon = new Image();
+                    ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/delete-app.png"));
+                    menu_item.Click += (object sender, RoutedEventArgs e) => { DeleteApplication(app_path); };
+                    app_context_menu.Items.Add(menu_item);
+                }
+                else
+                {
+                    menu_item = new MenuItem();
+                    menu_item.Header = "Run command";
+                    menu_item.Icon = new Image();
+                    //((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/delete-app.png"));
+                    menu_item.Click += (object sender, RoutedEventArgs e) => 
+                    {
+                        string args;
+                        if (ModrenMessageBox.ShowMessage(out args) == ModrenMessageResult.Ok)
+                            StartApplication(app_path, false, args);
+                    };
+                    app_context_menu.Items.Add(menu_item);
+                }
+
+                app_context_menu.Items.Add(new Separator());
+
+                menu_item = new MenuItem();
+                menu_item.Header = "Open directory";
+                menu_item.Icon = new Image();
+                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/directory.png"));
+                menu_item.Click += (object sender, RoutedEventArgs e) => { OpenDirectory(app_path); };
+                app_context_menu.Items.Add(menu_item);
+
+                menu_item = new MenuItem();
+                menu_item.Header = "Copy file path";
+                menu_item.Icon = new Image();
+                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/path.png"));
+                menu_item.Click += (object sender, RoutedEventArgs e) => { CopyPath(app_path, false); };
+                app_context_menu.Items.Add(menu_item);
+
+                menu_item = new MenuItem();
+                menu_item.Header = "Copy directory path";
+                menu_item.Icon = new Image();
+                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/directory_path.png"));
+                menu_item.Click += (object sender, RoutedEventArgs e) => { CopyPath(app_path, true); };
+                app_context_menu.Items.Add(menu_item);
+            }
+        }
+
+        #endregion
+
+        #region Functions
+
+        private void StartApplication(string app_path, bool AsAdmin)
+        {
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo(app_path);
+                if (AsAdmin) psi.Verb = "runas";
+                Process p = new Process();
+                p.StartInfo = psi;
+                p.Start();
+                if (AppList.Dictionary.ContainsKey(app_path.ToLower()))
+                {
+                    AppList.Dictionary[app_path.ToLower()].LastUsed = DateTime.Now;
+                    AppList.Dictionary[app_path.ToLower()].UsedTimes++;
+                    if (AppList.Dictionary[app_path.ToLower()].UsedTimes > AppList.frequancy)
+                        AppList.frequancy = AppList.Dictionary[app_path.ToLower()].UsedTimes;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error while starting this app:\n" + ex.Message, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void StartApplication(string app_path, bool AsAdmin, string args)
+        {
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo(app_path);
+                psi.Arguments = args;
+                if (AsAdmin) psi.Verb = "runas";
+                Process p = new Process();
+                p.StartInfo = psi;
+                p.Start();
+                if (AppList.Dictionary.ContainsKey(app_path.ToLower()))
+                {
+                    AppList.Dictionary[app_path.ToLower()].LastUsed = DateTime.Now;
+                    AppList.Dictionary[app_path.ToLower()].UsedTimes++;
+                    if (AppList.Dictionary[app_path.ToLower()].UsedTimes > AppList.frequancy)
+                        AppList.frequancy = AppList.Dictionary[app_path.ToLower()].UsedTimes;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error while starting this app:\n" + ex.Message, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void EditApplication(string app_path)
+        {
+            Applications.EditApplication(AppList.Dictionary[app_path.ToLower()]);
+        }
+
+        private void DeleteApplication(string app_path)
+        {
+            if (MessageBox.Show("Do you want to delete this app?", "App Launcher", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                string error;
+                if (!AppList.RemoveItem(app_path, out error))
+                    MessageBox.Show("Error while remove the item:\n" + error, "App launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void OpenDirectory(string app_path)
+        {
+            try
+            { Process.Start(new FileInfo(app_path).Directory.FullName); }
+            catch (Exception ex) { MessageBox.Show(ex.Message, "App launcher", MessageBoxButton.OK, MessageBoxImage.Error); }
+        }
+
+        private void CopyPath(string app_path, bool directory)
+        {
+            if (directory)
+                Clipboard.SetText(new FileInfo(app_path).Directory.FullName);
+            else
+                Clipboard.SetText(app_path);
+        }
+
+        private void ClearTextBtm_Click(object sender, RoutedEventArgs e)
+        {
+            search.Text = "";
+        }
+
+        #endregion
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            //make notifyIcon
+            ni = new System.Windows.Forms.NotifyIcon();
+            System.Windows.Forms.NotifyIcon icon = new System.Windows.Forms.NotifyIcon();
+            ni.Icon = new System.Drawing.Icon(Application.GetResourceStream(new Uri("pack://application:,,,/App Launcher;component/Images/small-icon.ico")).Stream);
+            ni.Visible = true;
+            ni.ContextMenu = new System.Windows.Forms.ContextMenu();
+
+            ni.ContextMenu.MenuItems.Add(new System.Windows.Forms.MenuItem("Show", (object sender2, EventArgs args) => { State = WindowVisibility.Visible; }));
+            ni.ContextMenu.MenuItems[0].DefaultItem = true;
+            ni.ContextMenu.MenuItems.Add(new System.Windows.Forms.MenuItem("Exit", (object sender2, EventArgs args) => { close_window = true; Close(); }));
+            
+            ni.Click += (object sender2, EventArgs args) => { State = WindowVisibility.Visible; };
+
+            //read apps list
+            string err;
+            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist"))
+            {
+                if (new FileInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist").Length > 7)
+                {
+                    while (!AppList.LoadFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist", out err))
+                        if (MessageBox.Show("error while loading file:\n" + err + ".\nTry again?", "Apps Launcher", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                            return;
+                }
+                else
+                {
+                    AppList.Dictionary = new Dictionary<string, AppItem>();
+                    AppList.List = new List<AppItem>();
+                    AppList.SaveFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist", out err);
+                }
+            }
+            else
+            {
+                try
+                {
+                    if (!Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\"))
+                        Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\");
+                    File.Create(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist");
+                }
+                catch (Exception) { }
+            }
+
+            //Background saving worker
+            BackgroundWorker SaverWorker = new BackgroundWorker();
+            SaverWorker.DoWork += (object sender2, DoWorkEventArgs args) =>
+            {
+                string error;
+                while (true)
+                {
+                    bool end_loop = false;
+                    for (int i = 0; i < 600; i++)
+                    {
+                        Thread.Sleep(500);
+                        if (!app_is_running)
+                        {
+                            end_loop = true;
+                            break;
+                        }
+                        if (end_loop)
+                            break;
+                    }
+                    if (!end_loop && AppList.ListHasChanged)
+                        AppList.SaveFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist", out error);
+                };
+            };
+            SaverWorker.RunWorkerAsync();
+
+            //get windows applications
+            windows_apps = new Dictionary<string, string>();
+            AppList.LoadWindowsApps(windows_apps, new FileInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\winapps"));
+
+            //load setting
+
+            if (Properties.Settings.Default.HideTitlebar)
+            {
+                WindowStyle = WindowStyle.None;
+                showtitle_img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/hide-titlebar-tick.png"));
+            }
+            else
+                showtitle_img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/hide-titlebar.png"));
+
+            if (Properties.Settings.Default.HideToRight)
+                AppList.Layout = HideLayout.HideToRight;
+
+            in_action = true;
+            Width = Properties.Settings.Default.Width;
+            Height = Properties.Settings.Default.Height;
+            Left = Properties.Settings.Default.Xpos;
+            Top = Properties.Settings.Default.Ypos;
+            in_action = false;
+
+            //hide and show window worker
+            BackgroundWorker Timer_BW = new BackgroundWorker();
+            Timer_BW.WorkerReportsProgress = true;
+            Timer_BW.DoWork += (object sender2, DoWorkEventArgs args) =>
+            {
+                while (!close_window)
+                {
+                    if (hide_after > 0)
+                        hide_after -= 100;
+                    else
+                    {
+                        Timer_BW.ReportProgress(0);
+                        hide_after = long.MaxValue;
+                    }
+                    Thread.Sleep(100);
+                }
+            };
+            Timer_BW.ProgressChanged += (object sender2, ProgressChangedEventArgs args) =>
+            {
+                if (!close_window && State == WindowVisibility.Show)
+                    State = WindowVisibility.Hide;
+            };
+            Timer_BW.RunWorkerAsync();
+
+            //View top application
+            ViewItems(SortList(""), false);
+
+            starting_window = false;
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            if (AppList.ListHasChanged)
+            {
+                string err;
+                while (!AppList.SaveFile((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist"), out err))
+                {
+                    var result = MessageBox.Show("error while saving file:\n" + err + ".\nTry again?", "Apps Launcher", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Cancel)
+                    {
+                        e.Cancel = true;
+                        break;
+                    }
+                    if (result == MessageBoxResult.No)
+                        break;
+                }
+            }
+            if (!close_window)
+            {
+                e.Cancel = true;
+                State = WindowVisibility.UnVisible;
+            }
+            else
+            {
+                app_is_running = false;
+                AppList.SaveWindowsApps(windows_apps, new FileInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\winapps"));
+                if (ni != null)
+                    ni.Visible = false;
+            }
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+           DragMove();
+        }
+
+        private void AppList_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                if (app_list.SelectedIndex > 0)
+                    StartApplication((app_list.SelectedItem as ListBoxItem).ToolTip.ToString(), false);
+        }
+
+        private void AppList_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                List<string> f = new List<string>();
+                string err;
+                foreach (string i in (string[])e.Data.GetData(DataFormats.FileDrop))
+                    if (File.Exists(i) && Path.GetExtension(i).ToLower().Equals(".exe"))
+                        f.Add(i);
+                if (f.Count == 0)
+                    MessageBox.Show("No apps in droped files", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Warning);
+                else
+                {
+                    foreach (var i in f)
+                        AppList.AddItem(i, Path.GetFileNameWithoutExtension(i), 4, out err);
+                }
+            }
+        }
+
     }
 }

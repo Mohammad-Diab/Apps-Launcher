@@ -115,8 +115,22 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="ModrenMessageBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Options.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ModrenMessageBox.xaml.cs">
+      <DependentUpon>ModrenMessageBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Options.xaml.cs">
+      <DependentUpon>Options.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -166,35 +180,10 @@
     <Resource Include="Images\main_icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\edit-app.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\directory.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\checkbox.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\add16.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\help-about16.png" />
-    <Resource Include="Images\list16.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\close.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\show-hide.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\min.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\browser.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\deleted.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
@@ -223,13 +212,64 @@
     <Resource Include="Images\path.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\no_icon.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\delete-app.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\applicaton.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\search-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Clear text.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\dot.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\arrow-linear.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\minimize.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\add-small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\hide-titlebar-tick.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\backup-list.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\restore-list.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\edit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\check-list.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\option.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\about.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\exit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\app-launcher.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\hide-titlebar.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\edit-app.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\small-icon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

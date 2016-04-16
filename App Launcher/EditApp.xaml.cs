@@ -11,7 +11,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Windows.Interop;
 using System.ComponentModel;
 using System.Threading;
@@ -23,48 +22,110 @@ namespace App_Launcher
     /// </summary>
     public partial class EditApp : Window
     {
-        bool save = false;
-        BackgroundWorker bw2, bw1;
-        bool done;      //variable th check if BackgroundWorker process change function has complete his iteration
-        static public BitmapSource[] images;
-        List<AppElements> new_apps = new List<AppElements>();
+        public static void EditList()
+        {
+            EditApp window = new EditApp();
+            window.ShowDialog();
+        }
+
+        bool stop_workers;
+        Dictionary<string, AppItem> new_apps = new Dictionary<string, AppItem>();
+        Dictionary<string, ListBoxItem> new_apps_for_list = new Dictionary<string, ListBoxItem>();
+        Thickness name_thickness = new Thickness(85, 5, 100, 0);
+        Thickness path_thickness = new Thickness(115, 28, 100, 0);
+        Thickness ch_thickness = new Thickness(10, 5, 0, 0);
+        Thickness img_thickness = new Thickness(31, 0, 0, 5);
+        Thickness rectangle_thickness = new Thickness(10, 0, 10, 1);
+        Thickness scroll_bar_thickness = new Thickness(0, 13, 10, 0);
+        Thickness priority_thickness = new Thickness(0, 20, 32, 0);
+
         public EditApp()
         {
             InitializeComponent();
         }
 
-        private void Add_Click(object sender, RoutedEventArgs e)
+        #region Load Window
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            AppElements app = new AddAPP().Show_Dialog();
-            if (!app.app_path.Equals(string.Empty))
-                if (!app.ExistedIn(new_apps, -1))
+            BackgroundWorker bw = new BackgroundWorker();
+            bw.DoWork += (object sender2, DoWorkEventArgs args) =>
+            {
+                for (int i = 0; i < AppList.List.Count; i++)
                 {
-                    new_apps.Add(app);
-                    app_list.Items.Insert(0, CreateList(-2, app, false, true));
+                    if (stop_workers)
+                        break;
+                    bw.ReportProgress(i);
                 }
-                else
-                    MessageBox.Show("This application is already existe in the list", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+            };
+            bw.WorkerReportsProgress = true;
+            bw.WorkerSupportsCancellation = true;
+            bw.ProgressChanged += (object sender2, ProgressChangedEventArgs args) =>
+            {
+                new_apps.Add(AppList.List[args.ProgressPercentage].Location.ToLower(), AppList.List[args.ProgressPercentage]);
+                var item = CreateItem(AppList.List[args.ProgressPercentage], false);
+                new_apps_for_list.Add(AppList.List[args.ProgressPercentage].Location.ToLower(), item);
+                app_list.Items.Add(item);
+                TaskbarItemInfo.ProgressValue += (1.0 / AppList.List.Count);
+            };
+            bw.RunWorkerCompleted += (object sender2, RunWorkerCompletedEventArgs args) =>
+            {
+                if (!stop_workers)
+                {
+
+                    BackgroundWorker set_images = new BackgroundWorker();
+                    set_images.WorkerReportsProgress = true;
+                    set_images.DoWork += (object sender3, DoWorkEventArgs args3) =>
+                    {
+                        for (int i = 0; i < AppList.List.Count; i++)
+                        {
+                            Thread.Sleep(5);
+                            if (stop_workers)
+                                return;
+                            set_images.ReportProgress(i);
+                        }
+                    };
+
+                    set_images.ProgressChanged += (object sender3, ProgressChangedEventArgs args2) =>
+                    {
+                        (((app_list.Items[args2.ProgressPercentage] as ListBoxItem).Content as Grid).Children[0] as Image).Source = Applications.GetImage(AppList.List[args2.ProgressPercentage].Location, 48);
+                    };
+                    set_images.RunWorkerAsync();
+
+                    loading_tb.Visibility = Visibility.Collapsed;
+                    app_list.Visibility = Visibility.Visible;
+                    Count.Text = app_list.Items.Count + (app_list.Items.Count == 1 ? " item" : " items");
+                }
+            };
+            bw.RunWorkerAsync();
         }
 
-        private ListBoxItem CreateList(int index, AppElements app, bool cheacked, bool imaged)
+        private ListBoxItem CreateItem(AppItem app, bool get_image)
         {
-            index = -1;
             Image img = new Image();
             img.Height = img.Width = 48;
             img.HorizontalAlignment = HorizontalAlignment.Left;
-            img.Margin = OrginalList.img_thickness;
+            img.Margin = img_thickness;
+            if (get_image)
+                img.Source = Applications.GetImage(app.Location, 48);
+            else
+                img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/applicaton.png"));
 
             TextBox name = new TextBox();
-            name.Text = app.app_name;
+            name.Text = app.AppName;
             name.FontSize = 16;
             name.VerticalAlignment = VerticalAlignment.Top;
-            name.Foreground = System.Windows.Media.Brushes.Crimson;
-            name.Margin = OrginalList.name_thickness;
-            //name.TextWrapping = TextWrapping.NoWrap;
+            name.Foreground = Brushes.Crimson;
+            name.Background = Brushes.Transparent;
+            name.Margin = name_thickness;
             name.BorderBrush = null;
+            name.TextChanged += (object sender, TextChangedEventArgs args) => 
+            {
+                app.AppName = name.Text;
+            };
 
-            Rectangle rec = new Rectangle();
-            rec.Margin = OrginalList.rectangle_thickness;
+            var rec = new System.Windows.Shapes.Rectangle();
+            rec.Margin = rectangle_thickness;
             rec.Fill = Brushes.Black;
             rec.Height = 1.3;
             rec.VerticalAlignment = VerticalAlignment.Bottom;
@@ -72,15 +133,15 @@ namespace App_Launcher
             CheckBox ch = new CheckBox();
             ch.HorizontalAlignment = HorizontalAlignment.Left;
             ch.VerticalAlignment = VerticalAlignment.Top;
-            ch.Margin = OrginalList.ch_thickness;
-            ch.IsChecked = cheacked;
+            ch.Margin = ch_thickness;
+            ch.IsChecked = false;
 
             TextBlock path = new TextBlock();
-            path.Text = app.app_path;
+            path.Text = app.Location;
             path.HorizontalAlignment = HorizontalAlignment.Left;
             path.VerticalAlignment = VerticalAlignment.Top;
             path.Foreground = Brushes.Green;
-            path.Margin = OrginalList.path_thickness;
+            path.Margin = path_thickness;
             path.TextTrimming = TextTrimming.CharacterEllipsis;
 
             ScrollBar scroll = new ScrollBar();
@@ -88,59 +149,38 @@ namespace App_Launcher
             scroll.VerticalAlignment = VerticalAlignment.Top;
             scroll.Height = 30;
             scroll.Width = 15;
-            scroll.Margin = OrginalList.scroll_bar_thickness;
-            scroll.Value = 9 - app.priority;
+            scroll.Margin = scroll_bar_thickness;
+            scroll.Value = 9 - app.Priority;
             scroll.Maximum = 9;
             scroll.Minimum = 0;
             scroll.SmallChange = 1;
-            scroll.Scroll += scroll_Scroll;
 
             Run run1 = new Run("Priority: ");
-            Run run2 = new Run(app.priority.ToString());
+            Run run2 = new Run(app.Priority.ToString());
             run2.Foreground = Brushes.CadetBlue;
+
+            scroll.Scroll += (object sender, ScrollEventArgs e) =>
+            {
+                app.Priority = (byte)(9 - e.NewValue);
+                run2.Text = (9 - e.NewValue).ToString();
+            };
 
             TextBlock priority = new TextBlock();
             priority.HorizontalAlignment = HorizontalAlignment.Right;
             priority.VerticalAlignment = VerticalAlignment.Top;
-            priority.Margin = OrginalList.priority_thickness;
+            priority.Margin = priority_thickness;
             priority.Inlines.Add(run1);
             priority.Inlines.Add(run2);
 
 
             Grid grid = new Grid();
-            //if (index < 0)
-            if (!imaged)
-                img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/applicaton.png"));
-            else
-            {
-                try
-                { img.Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(app.app_path).Handle, System.Windows.Int32Rect.Empty, System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()); }
-                catch (Exception)
-                {
-                    grid.Opacity = 0.7;
-                    grid.Background = Brushes.Coral;
-                    img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/applicaton.png"));
-                }
-            }
-            //try
-            //    { img.Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(app.app_path).Handle, System.Windows.Int32Rect.Empty, System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()); }
-
-            //    catch (Exception)
-            //    {
-            //        grid.Opacity = 0.7;
-            //        grid.Background = Brushes.Coral;
-            //        img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/applicaton.png")); 
-            //    }
-            //else
-            //    if (images[index] != null)
-            //        img.Source = images[index];
-            //    else
-            //    {
-            //        grid.Opacity = 0.7;
-            //        grid.Background = Brushes.Coral;
-            //        img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/deleted.png"));
-            //    }
             grid.Width = app_list.ActualWidth - 32;
+            if (!File.Exists(app.Location))
+            {
+                grid.IsEnabled = false;
+                grid.Opacity = 0.7;
+                grid.Background = Brushes.Coral;
+            }
             grid.Children.Add(img);
             grid.Children.Add(name);
             grid.Children.Add(path);
@@ -150,115 +190,37 @@ namespace App_Launcher
             grid.Children.Add(rec);
 
             ListViewItem item = new ListViewItem();
-            //item.ContextMenuOpening += File_ContextMenuCreator;
-            //item.Width = app_list.ActualWidth - 10;
-            item.ContentStringFormat = app.app_path;
-            //item.ContextMenu = new ContextMenu();
+            item.ContentStringFormat = app.Location;
+            item.Tag = app;
             item.Content = grid;
 
             return item;
         }
 
-        private void scroll_Scroll(object sender, ScrollEventArgs e)
+        private void Window_Closing(object sender, CancelEventArgs e)
         {
-            ((Run)((TextBlock)(((Grid)((ScrollBar)sender).Parent).Children[4])).Inlines.FirstInline.NextInline).Text = (9 - e.NewValue).ToString();
+            stop_workers = true;
         }
 
-        private void File_ContextMenuCreator(object sender, ContextMenuEventArgs e)
-        {
-            //throw new NotImplementedException();
-        }
+        #endregion
 
-        private void DeleteSelected_Click(object sender, RoutedEventArgs e)
+        #region Main Menu Function
+
+        private void Add_Click(object sender, RoutedEventArgs e)
         {
-            List<int> index = new List<int>();
-            for (int i = 0; i < app_list.SelectedItems.Count; i++)
-                for (int j = 0; j < app_list.Items.Count; j++)
-                    if (app_list.SelectedItems[i] == app_list.Items[j])
-                    {
-                        index.Add(j);
-                        break;
-                    }
-            for (int i = index.Count - 1; i > -1; i--)
+            var item = Applications.GetApplication();
+            if (item != null)
             {
-                app_list.Items.RemoveAt(i);
-                new_apps.RemoveAt(i);
-            }
-        }
-
-        private void DeleteChecked_Click(object sender, RoutedEventArgs e)
-        {
-            for (int i = app_list.Items.Count - 1; i > -1; i--)
-                if (((CheckBox)((Grid)((ListBoxItem)app_list.Items[i]).Content).Children[3]).IsChecked == true)
-                {
-                    app_list.Items.RemoveAt(i);
-                    new_apps.RemoveAt(i);
-                }
-        }
-
-        private void AddFrom_Click(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Forms.FolderBrowserDialog fbd = new System.Windows.Forms.FolderBrowserDialog();
-            fbd.Description = "Select directory to search in it for application:";
-            if (fbd.ShowDialog().Equals(System.Windows.Forms.DialogResult.OK))
-            {
-                DirectoryInfo dir = new DirectoryInfo(fbd.SelectedPath);
-                List<AppElements> exe_files = new List<AppElements>();
-                GetEXEFiles(dir, exe_files);
-                if (exe_files.Count > 0)
-                {
-                    List<AppElements> items = new AddFrom().Show_Dialog(exe_files);
-                    if (items.Count > 0)
-                    {
-                        int added = 0;
-                        foreach (var i in items)
-                        {
-                            if (!i.ExistedIn(new_apps, -1))
-                            {
-                                added++;
-                                app_list.Items.Insert(0, CreateList(-7, i, false, true));
-                                new_apps.Add(i);
-                            }
-                        }
-                        if (added == 0)
-                            MessageBox.Show("No apps have been added.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                        else if (added < items.Count)
-                            MessageBox.Show("Some applications is already existed in list and they have been skiped.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                        else
-                            MessageBox.Show("All applications have been added sccessfully.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                }
+                filter_tb.Text = "";
+                if (new_apps.ContainsKey(item.Location.ToLower()))
+                    MessageBox.Show("App already exist in the list.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
                 else
-                    MessageBox.Show("No applications in this location.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                {
+                    new_apps.Add(item.Location.ToLower(), item);
+                    app_list.Items.Add(CreateItem(item, true));
+                }
             }
-        }
-
-        private void GetEXEFiles(DirectoryInfo dir, List<AppElements> exe_files)
-        {
-            try
-            {
-                FileInfo[] files = dir.GetFiles();
-                foreach (var i in files)
-                    if (i.Extension.ToLower().Equals(".exe"))
-                        exe_files.Add(new AppElements(i.Name.Substring(0, i.Name.Length - 4), i.FullName, 0));
-            }
-            catch (Exception) { }
-            try
-            {
-                DirectoryInfo[] sub = dir.GetDirectories();
-                foreach (var i in sub)
-                    GetEXEFiles(i, exe_files);
-            }
-            catch (Exception) { }
-        }
-
-        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            foreach (ListBoxItem i in app_list.Items)
-                //{
-                ((Grid)i.Content).Width = app_list.ActualWidth - 32;
-            //    i.Width = app_list.ActualWidth - 10;
-            //}
+            Count.Text = app_list.Items.Count + (app_list.Items.Count == 1 ? " item" : " items");
         }
 
         private void SelectAll_Click(object sender, RoutedEventArgs e)
@@ -276,33 +238,94 @@ namespace App_Launcher
         private void Invert_Click(object sender, RoutedEventArgs e)
         {
             foreach (ListBoxItem i in app_list.Items)
-                if (((CheckBox)((Grid)i.Content).Children[3]).IsChecked == false)
-                    ((CheckBox)((Grid)i.Content).Children[3]).IsChecked = true;
-                else
-                    ((CheckBox)((Grid)i.Content).Children[3]).IsChecked = false;
+                ((CheckBox)((Grid)i.Content).Children[3]).IsChecked = !((CheckBox)((Grid)i.Content).Children[3]).IsChecked.Value;
         }
 
-        internal List<AppElements> Show_Dialog()
+        private void DeleteSelected_Click(object sender, RoutedEventArgs e)
         {
-            ShowDialog();
-            if (save)
+            List<string> to_delete = new List<string>();
+            foreach (ListBoxItem i in app_list.SelectedItems)
+                to_delete.Add(i.ContentStringFormat.ToLower());
+            foreach (var i in to_delete)
             {
-                new_apps.Clear();
-                foreach (ListBoxItem i in app_list.Items)
-                {
-                    int pr;
-                    int.TryParse(((Run)((TextBlock)((Grid)i.Content).Children[4]).Inlines.FirstInline.NextInline).Text, out pr);
-                    new_apps.Add(new AppElements(((TextBox)((Grid)i.Content).Children[1]).Text, ((TextBlock)((Grid)i.Content).Children[2]).Text, pr));
-                }
-                return new_apps;
+                if (app_list.Items.Contains(new_apps_for_list[i]))
+                    app_list.Items.Remove(new_apps_for_list[i]);
+                new_apps.Remove(i);
+                new_apps_for_list.Remove(i);
             }
-            return OrginalList.orginal_list;
+            Count.Text = app_list.Items.Count + (app_list.Items.Count == 1 ? " item" : " items");
+        }
+
+        private void DeleteChecked_Click(object sender, RoutedEventArgs e)
+        {
+            List<string> to_delete = new List<string>();
+            for (int i = app_list.Items.Count - 1; i > -1; i--)
+                if (((CheckBox)((Grid)((ListBoxItem)app_list.Items[i]).Content).Children[3]).IsChecked == true)
+                    to_delete.Add(((ListBoxItem)app_list.Items[i]).ContentStringFormat.ToLower());
+            foreach (var i in to_delete)
+            {
+                if (app_list.Items.Contains(new_apps_for_list[i]))
+                    app_list.Items.Remove(new_apps_for_list[i]);
+                new_apps.Remove(i);
+                new_apps_for_list.Remove(i);
+            }
+            Count.Text = app_list.Items.Count + (app_list.Items.Count == 1 ? " item" : " items");
+        }
+
+        private void AddFrom_Click(object sender, RoutedEventArgs e)
+        {
+            var fbd = new System.Windows.Forms.FolderBrowserDialog();
+            fbd.Description = "Select directory to search in it for application:";
+            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                DirectoryInfo dir = new DirectoryInfo(fbd.SelectedPath);
+                List<AppItem> exe_files = new List<AppItem>();
+                GetEXEFiles(dir, exe_files);
+                if (exe_files.Count > 0)
+                {
+                    List<AppItem> items = new AddFrom().Show_Dialog(exe_files);
+                    if (items.Count > 0)
+                    {
+                        int added = 0;
+                        foreach (var i in items)
+                        {
+                            if (!new_apps.ContainsKey(i.Location.ToLower()))
+                            {
+                                added++;
+                                var app = CreateItem(i, true);
+                                new_apps.Add(i.Location.ToLower(), i);
+                                new_apps_for_list.Add(i.Location.ToLower(), app);
+                                app_list.Items.Insert(0, app);
+                            }
+                        }
+                        if (added == 0)
+                            MessageBox.Show("No apps have been added.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        else if (added < items.Count)
+                            MessageBox.Show("Some applications is already existed in list and they have been skiped.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        else
+                            MessageBox.Show("All applications have been added sccessfully.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                else
+                    MessageBox.Show("No applications in this location.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
+            Count.Text = app_list.Items.Count + (app_list.Items.Count == 1 ? " item" : " items");
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            save = true;
-            Close();
+            IsEnabled = false;
+            app_list.Visibility = Visibility.Collapsed;
+            loading_tb.Visibility = Visibility.Visible;
+            loading_tb.Text = "Saving...";
+            BackgroundWorker timer = new BackgroundWorker();
+            timer.DoWork += (object sender2, DoWorkEventArgs args) => { Thread.Sleep(500); };
+            timer.RunWorkerCompleted += (object sender2, RunWorkerCompletedEventArgs args) => 
+            {
+                AppList.ReBuildList(new_apps);
+                Close();
+            };
+            timer.RunWorkerAsync();
         }
 
         private void Discard_Click(object sender, RoutedEventArgs e)
@@ -310,116 +333,113 @@ namespace App_Launcher
             Close();
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        #endregion
+
+        private void GetEXEFiles(DirectoryInfo dir, List<AppItem> exe_files)
         {
-            images = new BitmapSource[OrginalList.orginal_list.Count];
-            bw2 = new BackgroundWorker();
-            bw2.DoWork += bw_DoWork;
-            bw2.WorkerReportsProgress = true;
-            bw2.WorkerSupportsCancellation = true;
-            bw2.ProgressChanged += bw_ProgressChanged;
-            bw2.RunWorkerCompleted += bw_RunWorkerCompleted;
-            bw2.RunWorkerAsync(/*images*/);
-            processbar.Value = TaskbarItemInfo.ProgressValue = 0;
+            try
+            {
+                FileInfo[] files = dir.GetFiles();
+                foreach (var i in files)
+                    if (i.Extension.ToLower().Equals(".exe"))
+                        exe_files.Add(new AppItem(Path.GetFileNameWithoutExtension(i.FullName), i.FullName, 4));
+            }
+            catch (Exception) { }
+            try
+            {
+                DirectoryInfo[] sub = dir.GetDirectories();
+                foreach (var i in sub)
+                    GetEXEFiles(i, exe_files);
+            }
+            catch (Exception) { }
         }
 
-        void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            //processbar.Value = TaskbarItemInfo.ProgressValue = 0;
-            //for (int i = 0; i < OrginalList.orginal_list.Count; i++)
-            //{
-            //    app_list.Items.Add(CreateList(i, OrginalList.orginal_list[i], false));
-            //    new_apps.Add(OrginalList.orginal_list[i]);
-            //    processbar.Visibility = Visibility.Collapsed;
-            //    IsHitTestVisible = true;
-            //    TaskbarItemInfo.ProgressValue += 1.0 / OrginalList.orginal_list.Count;
-            //    processbar.Value += 100.0 / OrginalList.orginal_list.Count;
-            //}
-            processbar.Visibility = Visibility.Collapsed;
-            app_list.Visibility = Visibility.Visible;
-            Count.Text = app_list.Items.Count + " item" + (app_list.Items.Count > 1 ? "s" : "");
-            bw1 = new BackgroundWorker();
-            bw1.WorkerReportsProgress = true;
-            bw1.WorkerSupportsCancellation = true;
-            bw1.DoWork += bw2_DoWork;
-            bw1.ProgressChanged += bw2_ProgressChanged;
-            bw1.RunWorkerAsync();
+            foreach (ListBoxItem i in app_list.Items)
+                ((Grid)i.Content).Width = app_list.ActualWidth - 32;
         }
 
-        private void bw2_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void Filter_TB_TextChanged(object sender, TextChangedEventArgs e)
         {
-            int i = e.ProgressPercentage;
-            Grid grid = (Grid)((ListViewItem)app_list.Items[i]).Content;
-            Image img = (Image)grid.Children[0];
-            string path = ((ListViewItem)app_list.Items[i]).ContentStringFormat;
-            if (File.Exists(path))
-                try
-                { img.Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(path).Handle, System.Windows.Int32Rect.Empty, System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions()); }
-                catch (Exception)
-                {
-                    grid.Opacity = 0.7;
-                    grid.Background = Brushes.Coral;
-                    img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/deleted.png"));
-                }
+            if (filter_tb.Text != "")
+                filter_placeholder.Visibility = Visibility.Collapsed;
             else
+                filter_placeholder.Visibility = Visibility.Visible;
+            app_list.Items.Clear();
+            foreach (var i in new_apps_for_list)
+                if (((AppItem)i.Value.Tag).AppName.ToLower().Contains(filter_tb.Text.ToLower()))
+                    app_list.Items.Add(i.Value);
+        }
+
+        private void SortListByName_Click(object sender, RoutedEventArgs e)
+        {
+            Sorter(SortBy.Name);
+        }
+
+        private void SortListByPath_Click(object sender, RoutedEventArgs e)
+        {
+            Sorter(SortBy.Path);
+        }
+
+        private void SortListByPriority_Click(object sender, RoutedEventArgs e)
+        {
+            Sorter(SortBy.Priority);
+        }
+
+        void Sorter(SortBy by)
+        {
+            List<ListBoxItem> tmp = new List<ListBoxItem>();
+            foreach (ListBoxItem i in app_list.Items)
+                tmp.Add(i);
+            tmp.Sort((ListBoxItem x, ListBoxItem y) =>
             {
-                grid.Opacity = 0.7;
-                grid.Background = Brushes.Coral;
-                img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/deleted.png"));
-            }
-            done = true;
+                switch (by)
+                {
+                    case SortBy.Name:
+                        return ((AppItem)x.Tag).AppName.CompareTo(((AppItem)y.Tag).AppName);
+                    case SortBy.Path:
+                        return x.ContentStringFormat.ToLower().CompareTo(y.ContentStringFormat.ToLower());
+                    case SortBy.Priority:
+                        return (((ScrollBar)(((Grid)x.Content).Children[5])).Value).CompareTo(((ScrollBar)(((Grid)y.Content).Children[5])).Value);
+                }
+                return 0;
+            });
+            app_list.Items.Clear();
+            foreach (ListBoxItem i in tmp)
+                app_list.Items.Add(i);
         }
 
-        private void bw2_DoWork(object sender, DoWorkEventArgs e)
+        private void AppList_Drop(object sender, DragEventArgs e)
         {
-            for (int i = 0; i < OrginalList.orginal_list.Count; i++)
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                done = false;
-                ((BackgroundWorker)sender).ReportProgress(i);
-                while (!done)
-                    Thread.Sleep(1);
+                List<string> new_apps_list = new List<string>();
+                foreach (string i in (string[])e.Data.GetData(DataFormats.FileDrop))
+                    if (File.Exists(i) && Path.GetExtension(i).ToLower().Equals(".exe"))
+                        new_apps_list.Add(i);
+                if (new_apps_list.Count == 0)
+                    MessageBox.Show("No apps in droped files", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Warning);
+                else
+                {
+                    foreach (var i in new_apps_list)
+                    {
+                        if (!new_apps.ContainsKey(i))
+                        {
+                            var tmp = new AppItem(Path.GetFileNameWithoutExtension(i), i, 4);
+                            new_apps.Add(i, tmp);
+                            app_list.Items.Add(CreateItem(tmp, true));
+                        }
+                    }
+                    MessageBox.Show("Done", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
         }
-
-        void bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            //for (int i = 0; i < OrginalList.orginal_list.Count; i++)
-            //{
-            int i = e.ProgressPercentage;
-            app_list.Items.Add(CreateList(i, OrginalList.orginal_list[i], false, false));
-            new_apps.Add(OrginalList.orginal_list[i]);
-            TaskbarItemInfo.ProgressValue += 1.0 / OrginalList.orginal_list.Count;
-            processbar.Value += 100.0 / OrginalList.orginal_list.Count;
-            //}
-            //processbar.Value = (e.ProgressPercentage * 50.0) / (OrginalList.orginal_list.Count + 0.0);
-        }
-
-        void bw_DoWork(object sender, DoWorkEventArgs e)
-        {
-            for (int i = 0; i < OrginalList.orginal_list.Count; i++)
-            {
-                ((BackgroundWorker)sender).ReportProgress(i);
-                Thread.Sleep(1);
-            }
-            //BitmapSource[] images = (BitmapSource[])e.Argument;
-            //for (int i = 0; i < OrginalList.orginal_list.Count; i++)
-            //{
-            //    try
-            //    { images[i] = (Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(OrginalList.orginal_list[i].app_path).Handle, System.Windows.Int32Rect.Empty, System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions())); }
-            //    catch (Exception)
-            //    {
-            //        images[i] = null;
-            //    }
-            //    ((BackgroundWorker)sender).ReportProgress(i);
-            //}
-        }
-
-        private void Window_Closing(object sender, CancelEventArgs e)
-        {
-            if (bw2 != null && bw2.IsBusy)
-                bw2.CancelAsync();
-            if (bw1 != null && bw1.IsBusy)
-                bw1.CancelAsync();
-        }
+    }
+    enum SortBy
+    {
+        Name = 1,
+        Path = 2,
+        Priority = 3
     }
 }

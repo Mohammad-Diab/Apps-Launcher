@@ -10,10 +10,13 @@
                 <MenuItem Header="Invert checked items" Click="Invert_Click"/>
             </ContextMenu>
         </Grid.ContextMenu>
-        <ListBox x:Name="app_list" Margin="5,5,5,40"/>
-        <Button Content="Add" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="80" Height="25" Background="{x:Null}" IsDefault="True" Click="Add_Click"/>
-        <Button Content="Cancel" HorizontalAlignment="Right" Margin="0,0,95,10" VerticalAlignment="Bottom" Width="80" Height="25" Background="{x:Null}" IsCancel="True" Click="Cancel_Click"/>
-        <TextBlock HorizontalAlignment="Left" Margin="5,384,0,0" TextWrapping="Wrap" Text="$$ APPS and $$$ Checked" VerticalAlignment="Top" Foreground="DarkBlue"/>
+        <ListBox x:Name="app_list" Margin="0,35,0,0"/>
+        <Button Content="Add" HorizontalAlignment="Right" Margin="0,5,5,0" VerticalAlignment="Top" Width="80" Height="25" Background="{x:Null}" IsDefault="True" Click="Add_Click"/>
+        <Button Content="Cancel" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Width="80" Height="25" Background="{x:Null}" IsCancel="True" Click="Cancel_Click"/>
+        <TextBlock Margin="90,8,90,0" VerticalAlignment="Top" Foreground="DarkBlue" TextAlignment="Center">
+            <Run x:Name="checked_apps"/>
+            <Run x:Name="total_apps"/>
+        </TextBlock>
 
     </Grid>
 </Window>

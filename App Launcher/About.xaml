@@ -1,14 +1,14 @@
 ﻿<Window x:Class="App_Launcher.About"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="About" Height="350" Width="525" ResizeMode="NoResize" FlowDirection="LeftToRight" WindowStartupLocation="CenterScreen" Background="White" Icon="Images/help-about.png" FontSize="14">
+        Title="About" Height="350" Width="525" ResizeMode="NoResize" FlowDirection="LeftToRight" WindowStartupLocation="CenterScreen" Background="White" Icon="Images/help-about.png" FontSize="14" Loaded="Window_Loaded">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Image Margin="131,0,0,0" Height="256" VerticalAlignment="Top" Source="Images/icon.png" HorizontalAlignment="Left"/>
         <Label Content="Dr.Mohammad@outlook.com " Margin="121,0,0,46" VerticalAlignment="Bottom" FontSize="18" FontFamily="Segoe Print" Height="35" Foreground="BlueViolet" HorizontalAlignment="Left"/>
-        <TextBlock Margin="98,200,0,0" VerticalAlignment="Top" FontSize="26" TextAlignment="Center" Text="Apps Launcher 1.1.0.70 beta" HorizontalAlignment="Left">
+        <TextBlock x:Name="app_info" Margin="120,200,0,0" VerticalAlignment="Top" FontSize="26" TextAlignment="Center" Text="Apps Launcher 2.1.0.363" HorizontalAlignment="Left">
             <TextBlock.Foreground>
                 <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
                     <GradientStop Color="#FF00B9FF" Offset="1"/>

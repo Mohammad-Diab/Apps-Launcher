@@ -27,5 +27,10 @@ namespace App_Launcher
         {
             Close();
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            //app_info.Text = "Apps Launcher " + Environment.Version.Major + "." + Environment.Version.Minor + "." + Environment.Version.Revision + "." + Environment.Version.Build;
+        }
     }
 }
