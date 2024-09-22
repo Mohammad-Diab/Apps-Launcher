@@ -633,6 +633,7 @@ namespace Apps_Launcher
                     AppList.Dictionary[app_path.ToLower()].UsedTimes++;
                     if (AppList.Dictionary[app_path.ToLower()].UsedTimes > AppList.frequancy)
                         AppList.frequancy = AppList.Dictionary[app_path.ToLower()].UsedTimes;
+                    AppList.ListHasChanged = true;
                 }
             }
             catch (Exception ex)
@@ -657,6 +658,7 @@ namespace Apps_Launcher
                     AppList.Dictionary[app_path.ToLower()].UsedTimes++;
                     if (AppList.Dictionary[app_path.ToLower()].UsedTimes > AppList.frequancy)
                         AppList.frequancy = AppList.Dictionary[app_path.ToLower()].UsedTimes;
+                    AppList.ListHasChanged = true;
                 }
             }
             catch (Exception ex)
