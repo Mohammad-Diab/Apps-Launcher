@@ -351,8 +351,11 @@ namespace Apps_Launcher
         private void Search_PreviewKeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
+            {
+                RebuildList(search.Text);
                 if (app_list.Items.Count > 1)
                     StartApplication(((ListBoxItem)app_list.Items[1]).ToolTip.ToString(), false);
+            }
         }
 
         private List<AppItem> SortList(string search)
