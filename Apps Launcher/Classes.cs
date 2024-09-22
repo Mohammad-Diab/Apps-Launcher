@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 
 namespace Apps_Launcher
@@ -263,6 +265,7 @@ namespace Apps_Launcher
                         try
                         {
                             BinaryFormatter bf = new BinaryFormatter();
+                            bf.Binder = new OldVersionBinder();
                             tmp = (List<AppElements>)bf.Deserialize(stream);
                             stream.Close();
                         }
@@ -297,6 +300,7 @@ namespace Apps_Launcher
                         try
                         {
                             BinaryFormatter bf = new BinaryFormatter();
+                            bf.Binder = new OldVersionBinder();
                             Dictionary = (Dictionary<string, AppItem>)bf.Deserialize(stream);
                             List = new List<AppItem>();
                             stream.Close();
@@ -408,6 +412,21 @@ namespace Apps_Launcher
                 Dictionary.Add(i.Value.Location.ToLower(), i.Value);
                 List.Add(i.Value);
             }
+        }
+    }
+
+    class OldVersionBinder : SerializationBinder
+    {
+        public override Type BindToType(string assemblyName, string typeName)
+        {
+            if (!assemblyName.StartsWith("App Launcher,") && !typeName.Contains("App Launcher,"))
+                return null;
+            string current_assembly = typeof(AppItem).Assembly.FullName;
+            if (assemblyName.StartsWith("App Launcher,"))
+                assemblyName = current_assembly;
+            typeName = Regex.Replace(typeName, @"App Launcher, Version=[^,\]]*, Culture=[^,\]]*, PublicKeyToken=[^,\]]*", current_assembly);
+            typeName = typeName.Replace("App_Launcher.", "Apps_Launcher.");
+            return Type.GetType(typeName + ", " + assemblyName);
         }
     }
 
