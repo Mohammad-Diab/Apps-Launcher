@@ -641,7 +641,8 @@ namespace Apps_Launcher
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error while starting this app:\n" + ex.Message, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (!(ex is Win32Exception && ((Win32Exception)ex).NativeErrorCode == 1223))
+                    MessageBox.Show("Error while starting this app:\n" + ex.Message, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -666,7 +667,8 @@ namespace Apps_Launcher
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error while starting this app:\n" + ex.Message, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (!(ex is Win32Exception && ((Win32Exception)ex).NativeErrorCode == 1223))
+                    MessageBox.Show("Error while starting this app:\n" + ex.Message, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
