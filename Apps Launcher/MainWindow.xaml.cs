@@ -19,7 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shell;
 
-namespace App_Launcher
+namespace Apps_Launcher
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -234,7 +234,7 @@ namespace App_Launcher
         {
             string error;
             if (!Applications.AddApplication(out error))
-                MessageBox.Show(error, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(error, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private void Edit_Click(object sender, RoutedEventArgs e)
@@ -252,7 +252,7 @@ namespace App_Launcher
             {
                 string err;
                 if (!AppList.LoadFile(ofd.FileName, out err))
-                    MessageBox.Show(err, "App launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(err, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
                 AppList.ListHasChanged = true;
             }
         }
@@ -265,7 +265,7 @@ namespace App_Launcher
             {
                 string err;
                 if (!AppList.SaveFile(sfd.FileName, out err))
-                    MessageBox.Show(err, "App launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(err, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -288,10 +288,10 @@ namespace App_Launcher
                 //RebuildList(search.Text);
                 //string ex;
                 //OrginalList.SaveFile(out ex);
-                MessageBox.Show(st.ToString(), "App launcher", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(st.ToString(), "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
-                MessageBox.Show("Done", "App launcher", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Done", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void Option_Click(object sender, RoutedEventArgs e)
@@ -325,13 +325,13 @@ namespace App_Launcher
             if (WindowStyle == WindowStyle.None)
             {
                 WindowStyle = WindowStyle.SingleBorderWindow;
-                showtitle_img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/hide-titlebar.png"));
+                showtitle_img.Source = new BitmapImage(new Uri("pack://application:,,,/Apps Launcher;component/Images/hide-titlebar.png"));
                 Properties.Settings.Default.HideTitlebar = false;
             }
             else
             {
                 WindowStyle = WindowStyle.None;
-                showtitle_img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/hide-titlebar-tick.png"));
+                showtitle_img.Source = new BitmapImage(new Uri("pack://application:,,,/Apps Launcher;component/Images/hide-titlebar-tick.png"));
                 Properties.Settings.Default.HideTitlebar = true;
             }
             Properties.Settings.Default.Save();
@@ -531,13 +531,15 @@ namespace App_Launcher
                 menu_item.Header = "Start";
                 menu_item.Icon = new Image();
                 ((Image)menu_item.Icon).Source = Applications.GetImage(app_path, 16);
+                ((Image)menu_item.Icon).Width = 16;
                 menu_item.Click += (object sender, RoutedEventArgs e) => { StartApplication(app_path, false); };
                 app_context_menu.Items.Add(menu_item);
 
                 menu_item = new MenuItem();
                 menu_item.Header = "Run as administartor";
                 menu_item.Icon = new Image();
-                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/run-as-adimstrator.png"));
+                ((Image)menu_item.Icon).Width = 16;
+                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/Apps Launcher;component/Images/run-as-adimstrator.png"));
                 menu_item.Click += (object sender, RoutedEventArgs e) => { StartApplication(app_path, true); };
                 app_context_menu.Items.Add(menu_item);
 
@@ -548,14 +550,16 @@ namespace App_Launcher
                     menu_item = new MenuItem();
                     menu_item.Header = "Edit this application";
                     menu_item.Icon = new Image();
-                    ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/edit-app.png"));
+                    ((Image)menu_item.Icon).Width = 16;
+                    ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/Apps Launcher;component/Images/edit-app.png"));
                     menu_item.Click += (object sender, RoutedEventArgs e) => { EditApplication(app_path); };
                     app_context_menu.Items.Add(menu_item);
 
                     menu_item = new MenuItem();
                     menu_item.Header = "Delete";
                     menu_item.Icon = new Image();
-                    ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/delete-app.png"));
+                    ((Image)menu_item.Icon).Width = 16;
+                    ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/Apps Launcher;component/Images/delete-app.png"));
                     menu_item.Click += (object sender, RoutedEventArgs e) => { DeleteApplication(app_path); };
                     app_context_menu.Items.Add(menu_item);
                 }
@@ -564,7 +568,8 @@ namespace App_Launcher
                     menu_item = new MenuItem();
                     menu_item.Header = "Run command";
                     menu_item.Icon = new Image();
-                    //((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/delete-app.png"));
+                    ((Image)menu_item.Icon).Width = 16;
+                    //((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/Apps Launcher;component/Images/delete-app.png"));
                     menu_item.Click += (object sender, RoutedEventArgs e) => 
                     {
                         string args;
@@ -579,21 +584,24 @@ namespace App_Launcher
                 menu_item = new MenuItem();
                 menu_item.Header = "Open directory";
                 menu_item.Icon = new Image();
-                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/directory.png"));
+                ((Image)menu_item.Icon).Width = 16;
+                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/Apps Launcher;component/Images/directory.png"));
                 menu_item.Click += (object sender, RoutedEventArgs e) => { OpenDirectory(app_path); };
                 app_context_menu.Items.Add(menu_item);
 
                 menu_item = new MenuItem();
                 menu_item.Header = "Copy file path";
                 menu_item.Icon = new Image();
-                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/path.png"));
+                ((Image)menu_item.Icon).Width = 16;
+                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/Apps Launcher;component/Images/path.png"));
                 menu_item.Click += (object sender, RoutedEventArgs e) => { CopyPath(app_path, false); };
                 app_context_menu.Items.Add(menu_item);
 
                 menu_item = new MenuItem();
                 menu_item.Header = "Copy directory path";
                 menu_item.Icon = new Image();
-                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/directory_path.png"));
+                ((Image)menu_item.Icon).Width = 16;
+                ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/Apps Launcher;component/Images/directory_path.png"));
                 menu_item.Click += (object sender, RoutedEventArgs e) => { CopyPath(app_path, true); };
                 app_context_menu.Items.Add(menu_item);
             }
@@ -622,7 +630,7 @@ namespace App_Launcher
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error while starting this app:\n" + ex.Message, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Error while starting this app:\n" + ex.Message, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -646,7 +654,7 @@ namespace App_Launcher
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error while starting this app:\n" + ex.Message, "App Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Error while starting this app:\n" + ex.Message, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -657,11 +665,11 @@ namespace App_Launcher
 
         private void DeleteApplication(string app_path)
         {
-            if (MessageBox.Show("Do you want to delete this app?", "App Launcher", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (MessageBox.Show("Do you want to delete this app?", "Apps Launcher", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 string error;
                 if (!AppList.RemoveItem(app_path, out error))
-                    MessageBox.Show("Error while remove the item:\n" + error, "App launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Error while remove the item:\n" + error, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -669,7 +677,7 @@ namespace App_Launcher
         {
             try
             { Process.Start(new FileInfo(app_path).Directory.FullName); }
-            catch (Exception ex) { MessageBox.Show(ex.Message, "App launcher", MessageBoxButton.OK, MessageBoxImage.Error); }
+            catch (Exception ex) { MessageBox.Show(ex.Message, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
         private void CopyPath(string app_path, bool directory)
@@ -692,7 +700,7 @@ namespace App_Launcher
             //make notifyIcon
             ni = new System.Windows.Forms.NotifyIcon();
             System.Windows.Forms.NotifyIcon icon = new System.Windows.Forms.NotifyIcon();
-            ni.Icon = new System.Drawing.Icon(Application.GetResourceStream(new Uri("pack://application:,,,/App Launcher;component/Images/small-icon.ico")).Stream);
+            ni.Icon = new System.Drawing.Icon(Application.GetResourceStream(new Uri("pack://application:,,,/Apps Launcher;component/Images/small-icon.ico")).Stream);
             ni.Visible = true;
             ni.ContextMenu = new System.Windows.Forms.ContextMenu();
 
@@ -704,11 +712,11 @@ namespace App_Launcher
 
             //read apps list
             string err;
-            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist"))
+            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist"))
             {
-                if (new FileInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist").Length > 7)
+                if (new FileInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist").Length > 7)
                 {
-                    while (!AppList.LoadFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist", out err))
+                    while (!AppList.LoadFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist", out err))
                         if (MessageBox.Show("error while loading file:\n" + err + ".\nTry again?", "Apps Launcher", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                             return;
                 }
@@ -716,16 +724,16 @@ namespace App_Launcher
                 {
                     AppList.Dictionary = new Dictionary<string, AppItem>();
                     AppList.List = new List<AppItem>();
-                    AppList.SaveFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist", out err);
+                    AppList.SaveFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist", out err);
                 }
             }
             else
             {
                 try
                 {
-                    if (!Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\"))
-                        Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\");
-                    File.Create(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist");
+                    if (!Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\"))
+                        Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\");
+                    File.Create(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist");
                 }
                 catch (Exception) { }
             }
@@ -750,24 +758,24 @@ namespace App_Launcher
                             break;
                     }
                     if (!end_loop && AppList.ListHasChanged)
-                        AppList.SaveFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist", out error);
+                        AppList.SaveFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist", out error);
                 };
             };
             SaverWorker.RunWorkerAsync();
 
             //get windows applications
             windows_apps = new Dictionary<string, string>();
-            AppList.LoadWindowsApps(windows_apps, new FileInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\winapps"));
+            AppList.LoadWindowsApps(windows_apps, new FileInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\winapps"));
 
             //load setting
 
             if (Properties.Settings.Default.HideTitlebar)
             {
                 WindowStyle = WindowStyle.None;
-                showtitle_img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/hide-titlebar-tick.png"));
+                showtitle_img.Source = new BitmapImage(new Uri("pack://application:,,,/Apps Launcher;component/Images/hide-titlebar-tick.png"));
             }
             else
-                showtitle_img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/hide-titlebar.png"));
+                showtitle_img.Source = new BitmapImage(new Uri("pack://application:,,,/Apps Launcher;component/Images/hide-titlebar.png"));
 
             if (Properties.Settings.Default.HideToRight)
                 AppList.Layout = HideLayout.HideToRight;
@@ -814,7 +822,7 @@ namespace App_Launcher
             if (AppList.ListHasChanged)
             {
                 string err;
-                while (!AppList.SaveFile((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist"), out err))
+                while (!AppList.SaveFile((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist"), out err))
                 {
                     var result = MessageBox.Show("error while saving file:\n" + err + ".\nTry again?", "Apps Launcher", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
                     if (result == MessageBoxResult.Cancel)
@@ -834,7 +842,7 @@ namespace App_Launcher
             else
             {
                 app_is_running = false;
-                AppList.SaveWindowsApps(windows_apps, new FileInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\winapps"));
+                AppList.SaveWindowsApps(windows_apps, new FileInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\winapps"));
                 if (ni != null)
                     ni.Visible = false;
             }
@@ -862,7 +870,7 @@ namespace App_Launcher
                     if (File.Exists(i) && Path.GetExtension(i).ToLower().Equals(".exe"))
                         f.Add(i);
                 if (f.Count == 0)
-                    MessageBox.Show("No apps in droped files", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("No apps in droped files", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Warning);
                 else
                 {
                     foreach (var i in f)

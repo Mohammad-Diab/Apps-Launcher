@@ -1,4 +1,4 @@
-﻿<Window x:Class="App_Launcher.AddFrom"
+﻿<Window x:Class="Apps_Launcher.AddFrom"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Select items to add" Height="450" Width="500" FontSize="14" Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" Icon="Images/add.png">

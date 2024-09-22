@@ -1,7 +1,7 @@
 ﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:Forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms" x:Class="App_Launcher.EditApp"
+        xmlns:Forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms" x:Class="Apps_Launcher.EditApp"
     
         Title="EditApp" Height="420" Width="466" FontSize="14" MinWidth="380" MinHeight="390" SizeChanged="Window_SizeChanged" Loaded="Window_Loaded" Icon="Images/list.png" Closing="Window_Closing">
     <Window.TaskbarItemInfo>

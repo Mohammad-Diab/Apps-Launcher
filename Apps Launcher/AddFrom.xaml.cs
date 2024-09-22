@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Interop;
 
-namespace App_Launcher
+namespace Apps_Launcher
 {
     /// <summary>
     /// Interaction logic for AddFrom.xaml

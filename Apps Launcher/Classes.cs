@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Windows;
 
-namespace App_Launcher
+namespace Apps_Launcher
 {
     public enum WindowVisibility
     {
@@ -196,7 +196,7 @@ namespace App_Launcher
                 ii.Serialize(stream, Dictionary);
                 stream.Close();
                 Properties.Settings.Default.Save();
-                if (path.ToLower() == (Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist").ToLower())
+                if (path.ToLower() == (Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist").ToLower())
                     ListHasChanged = false;
                 error = "No error";
                 return true;
@@ -212,7 +212,7 @@ namespace App_Launcher
         {
             string save_error;
             if (ListHasChanged)
-                SaveFile((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist"), out save_error);
+                SaveFile((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist"), out save_error);
             if (File.Exists(path))
             {
                 //create stream
@@ -265,7 +265,7 @@ namespace App_Launcher
                             AddItem(i.app_path, i.app_name, (byte)i.priority, out err);
 
 
-                        if (path.ToLower() == (Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist").ToLower())
+                        if (path.ToLower() == (Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist").ToLower())
                         {
                             //save as new version
                             for (int i = 0; i < 3 && !SaveFile(path, out err); i++) ;

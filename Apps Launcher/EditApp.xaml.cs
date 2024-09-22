@@ -15,7 +15,7 @@ using System.Windows.Interop;
 using System.ComponentModel;
 using System.Threading;
 
-namespace App_Launcher
+namespace Apps_Launcher
 {
     /// <summary>
     /// Interaction logic for EditApp.xaml
@@ -109,7 +109,7 @@ namespace App_Launcher
             if (get_image)
                 img.Source = Applications.GetImage(app.Location, 48);
             else
-                img.Source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/applicaton.png"));
+                img.Source = new BitmapImage(new Uri("pack://application:,,,/Apps Launcher;component/Images/applicaton.png"));
 
             TextBox name = new TextBox();
             name.Text = app.AppName;
@@ -213,7 +213,7 @@ namespace App_Launcher
             {
                 filter_tb.Text = "";
                 if (new_apps.ContainsKey(item.Location.ToLower()))
-                    MessageBox.Show("App already exist in the list.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("App already exist in the list.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
                 else
                 {
                     new_apps.Add(item.Location.ToLower(), item);
@@ -299,15 +299,15 @@ namespace App_Launcher
                             }
                         }
                         if (added == 0)
-                            MessageBox.Show("No apps have been added.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                            MessageBox.Show("No apps have been added.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                         else if (added < items.Count)
-                            MessageBox.Show("Some applications is already existed in list and they have been skiped.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                            MessageBox.Show("Some applications is already existed in list and they have been skiped.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                         else
-                            MessageBox.Show("All applications have been added sccessfully.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
+                            MessageBox.Show("All applications have been added sccessfully.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
                 else
-                    MessageBox.Show("No applications in this location.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    MessageBox.Show("No applications in this location.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
             Count.Text = app_list.Items.Count + (app_list.Items.Count == 1 ? " item" : " items");
         }
@@ -419,7 +419,7 @@ namespace App_Launcher
                     if (File.Exists(i) && Path.GetExtension(i).ToLower().Equals(".exe"))
                         new_apps_list.Add(i);
                 if (new_apps_list.Count == 0)
-                    MessageBox.Show("No apps in droped files", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("No apps in droped files", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Warning);
                 else
                 {
                     foreach (var i in new_apps_list)
@@ -431,7 +431,7 @@ namespace App_Launcher
                             app_list.Items.Add(CreateItem(tmp, true));
                         }
                     }
-                    MessageBox.Show("Done", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("Done", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }

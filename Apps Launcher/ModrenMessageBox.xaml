@@ -1,9 +1,9 @@
-﻿<Window x:Class="App_Launcher.ModrenMessageBox"
+﻿<Window x:Class="Apps_Launcher.ModrenMessageBox"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:App_Launcher"
+        xmlns:local="clr-namespace:Apps_Launcher"
         mc:Ignorable="d"
         Title="ModrenMessageBox" Height="154.113" Width="460.15" FontSize="14" ResizeMode="NoResize">
     <Grid>

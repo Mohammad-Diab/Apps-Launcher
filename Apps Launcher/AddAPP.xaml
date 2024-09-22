@@ -1,4 +1,4 @@
-﻿<Window x:Class="App_Launcher.AddAPP"
+﻿<Window x:Class="Apps_Launcher.AddAPP"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Add APPLICATION" Height="255" Width="350" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" FontSize="14" Icon="Images/add.png">

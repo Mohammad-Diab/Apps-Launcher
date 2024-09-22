@@ -1,4 +1,4 @@
-﻿<Window x:Class="App_Launcher.About"
+﻿<Window x:Class="Apps_Launcher.About"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="About" Height="350" Width="525" ResizeMode="NoResize" FlowDirection="LeftToRight" WindowStartupLocation="CenterScreen" Background="White" Icon="Images/help-about.png" FontSize="14" Loaded="Window_Loaded">

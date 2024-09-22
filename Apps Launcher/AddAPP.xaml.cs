@@ -14,7 +14,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace App_Launcher
+namespace Apps_Launcher
 {
     /// <summary>
     /// Interaction logic for AddAPP.xaml
@@ -35,7 +35,7 @@ namespace App_Launcher
                 Close();
             }
             else
-                MessageBox.Show("Please select application first.", "App Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Please select application first.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
 
         private void CancelBtm_Click(object sender, RoutedEventArgs e)
@@ -111,11 +111,11 @@ namespace App_Launcher
         {
             BitmapSource bitmap_source = null;
             bool exist = false;
-            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\icons_cashe\\" + (file_path.GetHashCode() + 2147483648) + ".png"))
+            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\icons_cashe\\" + (file_path.GetHashCode() + 2147483648) + ".png"))
             {
                 try
                 {
-                    bitmap_source = new BitmapImage(new Uri(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\icons_cashe\\" + (file_path.GetHashCode() + 2147483648) + ".png"));
+                    bitmap_source = new BitmapImage(new Uri(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\icons_cashe\\" + (file_path.GetHashCode() + 2147483648) + ".png"));
                     exist = true;
                 }
                 catch (Exception) { }
@@ -133,12 +133,12 @@ namespace App_Launcher
                 {
                     try
                     {
-                        if (!Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\icons_cashe\\"))
+                        if (!Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\icons_cashe\\"))
                         {
-                            try { Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\icons_cashe\\"); }
+                            try { Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\icons_cashe\\"); }
                             catch (Exception) { }
                         }
-                        using (FileStream b = new FileStream(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\icons_cashe\\" + (file_path.GetHashCode() + 2147483648) + ".png", FileMode.OpenOrCreate))
+                        using (FileStream b = new FileStream(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\icons_cashe\\" + (file_path.GetHashCode() + 2147483648) + ".png", FileMode.OpenOrCreate))
                         {
                             PngBitmapEncoder n = new PngBitmapEncoder();
                             n.Frames.Add(BitmapFrame.Create(bitmap_source));
@@ -149,7 +149,7 @@ namespace App_Launcher
                 }
             }
             if (bitmap_source == null)
-                bitmap_source = new BitmapImage(new Uri("pack://application:,,,/App Launcher;component/Images/applicaton.png"));
+                bitmap_source = new BitmapImage(new Uri("pack://application:,,,/Apps Launcher;component/Images/applicaton.png"));
             return bitmap_source;
         }
     }
