@@ -698,10 +698,14 @@ namespace Apps_Launcher
 
         private void CopyPath(string app_path, bool directory)
         {
-            if (directory)
-                Clipboard.SetText(new FileInfo(app_path).Directory.FullName);
-            else
-                Clipboard.SetText(app_path);
+            try
+            {
+                if (directory)
+                    Clipboard.SetText(new FileInfo(app_path).Directory.FullName);
+                else
+                    Clipboard.SetText(app_path);
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
 
         private void ClearTextBtm_Click(object sender, RoutedEventArgs e)
