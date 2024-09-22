@@ -273,6 +273,9 @@ namespace Apps_Launcher
                             return false;
                         }
                         string err;
+                        List = new List<AppItem>();
+                        Dictionary = new Dictionary<string, AppItem>();
+                        frequancy = 1;
                         foreach (var i in tmp)
                             AddItem(i.app_path, i.app_name, (byte)i.priority, out err);
 
@@ -297,6 +300,7 @@ namespace Apps_Launcher
                             Dictionary = (Dictionary<string, AppItem>)bf.Deserialize(stream);
                             List = new List<AppItem>();
                             stream.Close();
+                            frequancy = 1;
                             foreach (var i in Dictionary)
                             {
                                 List.Add(i.Value);
