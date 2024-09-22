@@ -721,6 +721,7 @@ namespace Apps_Launcher
             ni = new System.Windows.Forms.NotifyIcon();
             System.Windows.Forms.NotifyIcon icon = new System.Windows.Forms.NotifyIcon();
             ni.Icon = new System.Drawing.Icon(Application.GetResourceStream(new Uri("pack://application:,,,/Apps Launcher;component/Images/small-icon.ico")).Stream);
+            ni.Text = "Apps Launcher";
             ni.Visible = true;
             ni.ContextMenu = new System.Windows.Forms.ContextMenu();
 
