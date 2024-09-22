@@ -290,7 +290,11 @@ namespace Apps_Launcher
                             List = new List<AppItem>();
                             stream.Close();
                             foreach (var i in Dictionary)
+                            {
                                 List.Add(i.Value);
+                                if (i.Value.UsedTimes > frequancy)
+                                    frequancy = i.Value.UsedTimes;
+                            }
                             error = "No error";
                             return true;
                         }
