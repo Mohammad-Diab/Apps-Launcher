@@ -63,8 +63,11 @@ namespace Apps_Launcher
             bw.WorkerSupportsCancellation = true;
             bw.ProgressChanged += (object sender2, ProgressChangedEventArgs args) =>
             {
-                new_apps.Add(AppList.List[args.ProgressPercentage].Location.ToLower(), AppList.List[args.ProgressPercentage]);
-                var item = CreateItem(AppList.List[args.ProgressPercentage], false);
+                var app = new AppItem(AppList.List[args.ProgressPercentage].AppName, AppList.List[args.ProgressPercentage].Location, AppList.List[args.ProgressPercentage].Priority);
+                app.UsedTimes = AppList.List[args.ProgressPercentage].UsedTimes;
+                app.LastUsed = AppList.List[args.ProgressPercentage].LastUsed;
+                new_apps.Add(app.Location.ToLower(), app);
+                var item = CreateItem(app, false);
                 new_apps_for_list.Add(AppList.List[args.ProgressPercentage].Location.ToLower(), item);
                 app_list.Items.Add(item);
                 TaskbarItemInfo.ProgressValue += (1.0 / AppList.List.Count);
