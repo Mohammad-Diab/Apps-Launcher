@@ -757,10 +757,10 @@ namespace Apps_Launcher
 
             //Background saving worker
             BackgroundWorker SaverWorker = new BackgroundWorker();
+            SaverWorker.WorkerReportsProgress = true;
             SaverWorker.DoWork += (object sender2, DoWorkEventArgs args) =>
             {
-                string error;
-                while (true)
+                while (app_is_running)
                 {
                     bool end_loop = false;
                     for (int i = 0; i < 600; i++)
@@ -774,10 +774,17 @@ namespace Apps_Launcher
                         if (end_loop)
                             break;
                     }
-                    if (!end_loop && AppList.ListHasChanged)
-                        AppList.SaveFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist", out error);
+                    if (!end_loop)
+                        SaverWorker.ReportProgress(0);
                 };
             };
+            SaverWorker.ProgressChanged += (object sender2, ProgressChangedEventArgs args) =>
+            {
+                string error;
+                if (app_is_running && AppList.ListHasChanged)
+                    AppList.SaveFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist", out error);
+            };
+            app_is_running = true;
             SaverWorker.RunWorkerAsync();
 
             //get windows applications
