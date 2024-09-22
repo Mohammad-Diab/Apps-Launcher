@@ -314,9 +314,9 @@ namespace Apps_Launcher
             {
                 if (!output_file.Exists)
                 {
-                    if (Directory.Exists(output_file.DirectoryName))
+                    if (!Directory.Exists(output_file.DirectoryName))
                         Directory.CreateDirectory(output_file.DirectoryName);
-                    output_file.Create();
+                    output_file.Create().Close();
                 }
                 StreamWriter sw = new StreamWriter(output_file.Open(FileMode.Truncate));
                 foreach (var i in win_app_list)
