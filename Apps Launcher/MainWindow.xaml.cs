@@ -733,9 +733,11 @@ namespace Apps_Launcher
                 {
                     if (!Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\"))
                         Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\");
-                    File.Create(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist");
                 }
                 catch (Exception) { }
+                AppList.Dictionary = new Dictionary<string, AppItem>();
+                AppList.List = new List<AppItem>();
+                AppList.SaveFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist", out err);
             }
 
             //Background saving worker
