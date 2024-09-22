@@ -235,13 +235,14 @@ namespace Apps_Launcher
             string error;
             if (!Applications.AddApplication(out error))
                 MessageBox.Show(error, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+            RebuildList(search.Text);
         }
 
         private void Edit_Click(object sender, RoutedEventArgs e)
         {
             OpenMenu = false;
             EditApp.EditList();
-            //RebuildList(search.Text);
+            RebuildList(search.Text);
         }
 
         private void RestoreList_Click(object sender, RoutedEventArgs e)
@@ -254,6 +255,7 @@ namespace Apps_Launcher
                 if (!AppList.LoadFile(ofd.FileName, out err))
                     MessageBox.Show(err, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
                 AppList.ListHasChanged = true;
+                RebuildList(search.Text);
             }
         }
 
@@ -285,7 +287,7 @@ namespace Apps_Launcher
                     if (AppList.RemoveItem(i, out err))
                         st.Append(i + "\n");
                 }
-                //RebuildList(search.Text);
+                RebuildList(search.Text);
                 //string ex;
                 //OrginalList.SaveFile(out ex);
                 MessageBox.Show(st.ToString(), "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -406,6 +408,11 @@ namespace Apps_Launcher
                 };
                 bw.RunWorkerAsync();
             }
+        }
+
+        private void RebuildList(string search_word)
+        {
+            ViewItems(SortList(search_word), search_word != "");
         }
 
         #endregion
@@ -661,6 +668,7 @@ namespace Apps_Launcher
         private void EditApplication(string app_path)
         {
             Applications.EditApplication(AppList.Dictionary[app_path.ToLower()]);
+            RebuildList(search.Text);
         }
 
         private void DeleteApplication(string app_path)
@@ -670,6 +678,7 @@ namespace Apps_Launcher
                 string error;
                 if (!AppList.RemoveItem(app_path, out error))
                     MessageBox.Show("Error while remove the item:\n" + error, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+                RebuildList(search.Text);
             }
         }
 
@@ -881,6 +890,7 @@ namespace Apps_Launcher
                 {
                     foreach (var i in f)
                         AppList.AddItem(i, Path.GetFileNameWithoutExtension(i), 4, out err);
+                    RebuildList(search.Text);
                 }
             }
         }
