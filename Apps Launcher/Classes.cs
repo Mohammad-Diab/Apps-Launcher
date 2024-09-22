@@ -119,7 +119,15 @@ namespace Apps_Launcher
 
         public bool ChangeLocation(string new_location)
         {
-            return false;
+            if (path.ToLower() == new_location.ToLower())
+                return true;
+            if (AppList.Dictionary.ContainsKey(new_location.ToLower()))
+                return false;
+            AppList.Dictionary.Remove(path.ToLower());
+            path = new_location;
+            AppList.Dictionary.Add(path.ToLower(), this);
+            AppList.ListHasChanged = true;
+            return true;
         }
     }
 

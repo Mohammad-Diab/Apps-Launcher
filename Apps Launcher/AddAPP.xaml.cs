@@ -93,7 +93,8 @@ namespace Apps_Launcher
             if (window.ok)
             {
                 item.AppName = window.name.Text;
-                item.ChangeLocation(window.location.Text);
+                if (!item.ChangeLocation(window.location.Text))
+                    MessageBox.Show("App is already exist in the list.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
                 item.Priority = Convert.ToByte(window.priority.Value);
                 AppList.ListHasChanged = true;
             }
