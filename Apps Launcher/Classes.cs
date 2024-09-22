@@ -177,9 +177,9 @@ namespace Apps_Launcher
 
         static public bool SaveFile(string path, out string error)
         {
+            Stream stream = null;
             try
             {
-                Stream stream;
                 if (File.Exists(path))
                     stream = File.Open(path, FileMode.Truncate);
                 else
@@ -203,6 +203,8 @@ namespace Apps_Launcher
             }
             catch (Exception ex)
             {
+                if (stream != null)
+                    stream.Close();
                 error = ex.Message;
                 return false;
             }
@@ -240,6 +242,7 @@ namespace Apps_Launcher
                 }
                 catch (Exception ex)
                 {
+                    stream.Close();
                     error = ex.Message;
                     return false;
                 }
@@ -257,6 +260,7 @@ namespace Apps_Launcher
                         }
                         catch (Exception ex)
                         {
+                            stream.Close();
                             error = ex.Message;
                             return false;
                         }
@@ -292,11 +296,13 @@ namespace Apps_Launcher
                         }
                         catch (Exception ex)
                         {
+                            stream.Close();
                             error = ex.Message;
                             return false;
                         }
                     }
                 }
+                stream.Close();
             }
             error = "Invalid file.";
             return false;
