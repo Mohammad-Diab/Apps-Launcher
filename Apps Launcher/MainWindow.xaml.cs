@@ -809,6 +809,10 @@ namespace Apps_Launcher
             Height = Properties.Settings.Default.Height;
             Left = Properties.Settings.Default.Xpos;
             Top = Properties.Settings.Default.Ypos;
+            if (Top + Height > SystemParameters.WorkArea.Bottom)
+                Top = SystemParameters.WorkArea.Bottom - Height;
+            if (Top < SystemParameters.WorkArea.Top)
+                Top = SystemParameters.WorkArea.Top;
             in_action = false;
 
             //hide and show window worker
