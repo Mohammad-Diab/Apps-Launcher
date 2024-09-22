@@ -232,6 +232,7 @@ namespace Apps_Launcher
 
         private void AddApplication_Click(object sender, RoutedEventArgs e)
         {
+            OpenMenu = false;
             string error;
             if (!Applications.AddApplication(out error))
                 MessageBox.Show(error, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
