@@ -117,7 +117,7 @@ namespace Apps_Launcher
             scroll.Maximum = 9;
             scroll.Minimum = 0;
             scroll.SmallChange = 1;
-            scroll.Scroll += (object sender, ScrollEventArgs e) => { run2.Text = (9 - e.NewValue).ToString(); };
+            scroll.Scroll += (object sender, ScrollEventArgs e) => { run2.Text = Math.Round(9 - e.NewValue).ToString(); };
 
             TextBlock priority = new TextBlock();
             priority.HorizontalAlignment = HorizontalAlignment.Right;

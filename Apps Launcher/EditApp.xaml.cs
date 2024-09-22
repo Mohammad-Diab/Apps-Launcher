@@ -161,8 +161,8 @@ namespace Apps_Launcher
 
             scroll.Scroll += (object sender, ScrollEventArgs e) =>
             {
-                app.Priority = (byte)(9 - e.NewValue);
-                run2.Text = (9 - e.NewValue).ToString();
+                app.Priority = (byte)Math.Round(9 - e.NewValue);
+                run2.Text = app.Priority.ToString();
             };
 
             TextBlock priority = new TextBlock();
