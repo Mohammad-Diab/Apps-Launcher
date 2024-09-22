@@ -252,6 +252,8 @@ namespace Apps_Launcher
             var ofd = new System.Windows.Forms.OpenFileDialog();
             if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
+                if (MessageBox.Show("The apps list will be replaced with the apps in this file.\nDo you want to continue?", "Apps Launcher", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                    return;
                 string err;
                 if (!AppList.LoadFile(ofd.FileName, out err))
                     MessageBox.Show(err, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
