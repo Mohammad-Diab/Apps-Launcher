@@ -27,11 +27,12 @@ namespace Apps_Launcher
             catch (Exception ex)
             {
                 if (ex is IOException)
-                {
                     MessageBox.Show("You can run only one instance at a time.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
-                    AppList.SuccessfulStartUp = false;
-                    Shutdown();
-                }
+                else
+                    MessageBox.Show(ex.Message, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+                AppList.SuccessfulStartUp = false;
+                StartupUri = null;
+                Shutdown();
             }
         }
 
