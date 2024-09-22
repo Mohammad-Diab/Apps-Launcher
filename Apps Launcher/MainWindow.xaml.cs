@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
@@ -55,6 +56,7 @@ namespace Apps_Launcher
                 switch (value)
                 {
                     case WindowVisibility.Hide:
+                        clip_window = true;
                         if (AppList.Layout == HideLayout.HideToLeft)
                             MoveWindow(-ActualWidth, -ActualWidth + 20, true);
                         else
@@ -66,6 +68,17 @@ namespace Apps_Launcher
                             MoveWindow(-5, 0, false);
                         else
                             MoveWindow(SystemParameters.PrimaryScreenWidth - ActualWidth + 5, 0, false);
+                        BackgroundWorker show_bw = new BackgroundWorker();
+                        show_bw.DoWork += (object sender, DoWorkEventArgs args) => { Thread.Sleep(200); };
+                        show_bw.RunWorkerCompleted += (object sender, RunWorkerCompletedEventArgs args) =>
+                        {
+                            if (state == WindowVisibility.Show)
+                            {
+                                clip_window = false;
+                                ClipToPrimaryScreen();
+                            }
+                        };
+                        show_bw.RunWorkerAsync();
                         if (WindowState == WindowState.Minimized)
                             WindowState = WindowState.Normal;
                         Activate();
@@ -103,6 +116,38 @@ namespace Apps_Launcher
             in_action = false;
         }
 
+        [DllImport("user32.dll")]
+        static extern int SetWindowRgn(IntPtr hWnd, IntPtr hRgn, bool bRedraw);
+
+        [DllImport("gdi32.dll")]
+        static extern IntPtr CreateRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect);
+
+        bool clip_window = false, clipped = false;
+        private void ClipToPrimaryScreen()
+        {
+            HwndSource source = PresentationSource.FromVisual(this) as HwndSource;
+            if (source == null)
+                return;
+            bool neighbour = SystemParameters.VirtualScreenLeft < 0 || SystemParameters.VirtualScreenLeft + SystemParameters.VirtualScreenWidth > SystemParameters.PrimaryScreenWidth;
+            double from = Math.Max(0, -Left);
+            double to = Math.Min(ActualWidth, SystemParameters.PrimaryScreenWidth - Left);
+            if (!clip_window || !neighbour || (from == 0 && to == ActualWidth))
+            {
+                if (clipped)
+                {
+                    SetWindowRgn(source.Handle, IntPtr.Zero, true);
+                    clipped = false;
+                }
+                return;
+            }
+            Matrix m = source.CompositionTarget.TransformToDevice;
+            if (to <= from)
+                SetWindowRgn(source.Handle, CreateRectRgn(0, 0, 0, 0), true);
+            else
+                SetWindowRgn(source.Handle, CreateRectRgn((int)Math.Round(from * m.M11), 0, (int)Math.Round(to * m.M11), (int)Math.Ceiling(ActualHeight * m.M22)), true);
+            clipped = true;
+        }
+
         private void Window_Deactivated(object sender, EventArgs e)
         {
             hide_after = 0;
@@ -136,6 +181,7 @@ namespace Apps_Launcher
 
         private void Window_LocationChanged(object sender, EventArgs e)
         {
+            ClipToPrimaryScreen();
             if (!starting_window && !in_action)
             {
                 Properties.Settings.Default.Xpos = Left;
