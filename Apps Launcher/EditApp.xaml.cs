@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Interop;
+using System.Windows.Shell;
 using System.ComponentModel;
 using System.Threading;
 
@@ -96,6 +97,7 @@ namespace Apps_Launcher
 
                     loading_tb.Visibility = Visibility.Collapsed;
                     app_list.Visibility = Visibility.Visible;
+                    TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
                     Count.Text = app_list.Items.Count + (app_list.Items.Count == 1 ? " item" : " items");
                 }
             };
