@@ -88,7 +88,9 @@ namespace Apps_Launcher
 
                     set_images.ProgressChanged += (object sender3, ProgressChangedEventArgs args2) =>
                     {
-                        (((app_list.Items[args2.ProgressPercentage] as ListBoxItem).Content as Grid).Children[0] as Image).Source = Applications.GetImage(AppList.List[args2.ProgressPercentage].Location, 48);
+                        ListBoxItem item;
+                        if (new_apps_for_list.TryGetValue(AppList.List[args2.ProgressPercentage].Location.ToLower(), out item))
+                            ((item.Content as Grid).Children[0] as Image).Source = Applications.GetImage(AppList.List[args2.ProgressPercentage].Location, 48);
                     };
                     set_images.RunWorkerAsync();
 
