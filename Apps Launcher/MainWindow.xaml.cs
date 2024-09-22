@@ -281,7 +281,7 @@ namespace Apps_Launcher
                     to_delete.Add(AppList.List[i].Location);
             if (to_delete.Count > 0)
             {
-                StringBuilder st = new StringBuilder("These app has been deleted:\n");
+                StringBuilder st = new StringBuilder("These apps have been deleted:\n");
                 string err;
                 foreach (string i in to_delete)
                 {
@@ -509,7 +509,7 @@ namespace Apps_Launcher
             app_list.Items.Clear();
             if (list.Count == 0)
             {
-                app_list.Items.Add(CreateHeader(IsSearch ? "No APP match your search." : "There is no apps in the list."));
+                app_list.Items.Add(CreateHeader(IsSearch ? "No app matches your search." : "There are no apps in the list."));
             }
             else
             {
@@ -547,7 +547,7 @@ namespace Apps_Launcher
                 app_context_menu.Items.Add(menu_item);
 
                 menu_item = new MenuItem();
-                menu_item.Header = "Run as administartor";
+                menu_item.Header = "Run as administrator";
                 menu_item.Icon = new Image();
                 ((Image)menu_item.Icon).Width = 16;
                 ((Image)menu_item.Icon).Source = new BitmapImage(new Uri("pack://application:,,,/Apps Launcher;component/Images/run-as-adimstrator.png"));
@@ -685,7 +685,7 @@ namespace Apps_Launcher
             {
                 string error;
                 if (!AppList.RemoveItem(app_path, out error))
-                    MessageBox.Show("Error while remove the item:\n" + error, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Error while removing the item:\n" + error, "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
                 RebuildList(search.Text);
             }
         }
@@ -739,7 +739,7 @@ namespace Apps_Launcher
                 if (new FileInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist").Length > 7)
                 {
                     while (!AppList.LoadFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist", out err))
-                        if (MessageBox.Show("error while loading file:\n" + err + ".\nTry again?", "Apps Launcher", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                        if (MessageBox.Show("Error while loading the file:\n" + err + ".\nTry again?", "Apps Launcher", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                         {
                             AppList.Dictionary = new Dictionary<string, AppItem>();
                             AppList.List = new List<AppItem>();
@@ -863,7 +863,7 @@ namespace Apps_Launcher
                 string err;
                 while (!AppList.SaveFile((Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist"), out err))
                 {
-                    var result = MessageBox.Show("error while saving file:\n" + err + ".\nTry again?", "Apps Launcher", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                    var result = MessageBox.Show("Error while saving the file:\n" + err + ".\nTry again?", "Apps Launcher", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
                     if (result == MessageBoxResult.Cancel)
                     {
                         e.Cancel = true;
@@ -909,7 +909,7 @@ namespace Apps_Launcher
                     if (File.Exists(i) && Path.GetExtension(i).ToLower().Equals(".exe"))
                         f.Add(i);
                 if (f.Count == 0)
-                    MessageBox.Show("No apps in droped files", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("No apps in the dropped files", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Warning);
                 else
                 {
                     foreach (var i in f)

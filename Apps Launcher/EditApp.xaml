@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms" x:Class="Apps_Launcher.EditApp"
     
-        Title="EditApp" Height="420" Width="466" FontSize="14" MinWidth="380" MinHeight="390" SizeChanged="Window_SizeChanged" Loaded="Window_Loaded" Icon="Images/list.png" Closing="Window_Closing">
+        Title="Edit apps list" Height="420" Width="466" FontSize="14" MinWidth="380" MinHeight="390" SizeChanged="Window_SizeChanged" Loaded="Window_Loaded" Icon="Images/list.png" Closing="Window_Closing">
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo ProgressState="Normal"/>
     </Window.TaskbarItemInfo>
@@ -40,7 +40,7 @@
         <Border BorderBrush="Gray" BorderThickness="1" HorizontalAlignment="Right" Height="23" Margin="0,22,5,0" VerticalAlignment="Top" Width="168">
             <Grid>
                 <Image x:Name="image" HorizontalAlignment="Right" Source="Images/search-icon.png"/>
-                <TextBlock x:Name="filter_placeholder" HorizontalAlignment="Left" TextWrapping="Wrap" Text="filtter" Foreground="Gray" VerticalAlignment="Top" FontStyle="Italic" Margin="6,1,0,0"/>
+                <TextBlock x:Name="filter_placeholder" HorizontalAlignment="Left" TextWrapping="Wrap" Text="filter" Foreground="Gray" VerticalAlignment="Top" FontStyle="Italic" Margin="6,1,0,0"/>
                 <TextBox x:Name="filter_tb" Height="22" TextWrapping="Wrap" VerticalAlignment="Top" Background="Transparent" TextChanged="Filter_TB_TextChanged" Margin="0,0,21,0" BorderThickness="0"/>
             </Grid>
         </Border>

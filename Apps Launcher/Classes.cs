@@ -150,7 +150,7 @@ namespace Apps_Launcher
             }
             if (Dictionary.ContainsKey(path.ToLower()))
             {
-                error = "App is already exist in the list";
+                error = "App already exists in the list";
                 return false;
             }
             var tmp = new AppItem(name, path, priority);
@@ -175,7 +175,7 @@ namespace Apps_Launcher
                 }
                 else
                 {
-                    error = "App is already exist in the list";
+                    error = "App doesn't exist in the list";
                     return false;
                 }
             }

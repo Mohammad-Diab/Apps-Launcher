@@ -220,7 +220,7 @@ namespace Apps_Launcher
             {
                 filter_tb.Text = "";
                 if (new_apps.ContainsKey(item.Location.ToLower()))
-                    MessageBox.Show("App already exist in the list.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("App already exists in the list.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
                 else
                 {
                     var app = CreateItem(item, true);
@@ -284,7 +284,7 @@ namespace Apps_Launcher
         private void AddFrom_Click(object sender, RoutedEventArgs e)
         {
             var fbd = new System.Windows.Forms.FolderBrowserDialog();
-            fbd.Description = "Select directory to search in it for application:";
+            fbd.Description = "Select a folder to search for apps:";
             if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 DirectoryInfo dir = new DirectoryInfo(fbd.SelectedPath);
@@ -310,9 +310,9 @@ namespace Apps_Launcher
                         if (added == 0)
                             MessageBox.Show("No apps have been added.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                         else if (added < items.Count)
-                            MessageBox.Show("Some applications is already existed in list and they have been skiped.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                            MessageBox.Show("Some apps are already in the list and have been skipped.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                         else
-                            MessageBox.Show("All applications have been added sccessfully.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
+                            MessageBox.Show("All apps have been added successfully.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
                 else
@@ -428,7 +428,7 @@ namespace Apps_Launcher
                     if (File.Exists(i) && Path.GetExtension(i).ToLower().Equals(".exe"))
                         new_apps_list.Add(i);
                 if (new_apps_list.Count == 0)
-                    MessageBox.Show("No apps in droped files", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("No apps in the dropped files", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Warning);
                 else
                 {
                     foreach (var i in new_apps_list)

@@ -35,7 +35,7 @@ namespace Apps_Launcher
                 Close();
             }
             else
-                MessageBox.Show("Please select application first.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Please select an application first.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
 
         private void CancelBtm_Click(object sender, RoutedEventArgs e)
@@ -70,7 +70,7 @@ namespace Apps_Launcher
             {
                 if (AppList.Dictionary.ContainsKey(window.location.Text.ToLower()))
                 {
-                    error = "App is already exist in the list.";
+                    error = "App already exists in the list.";
                     return false;
                 }
                 else
@@ -94,7 +94,7 @@ namespace Apps_Launcher
             {
                 item.AppName = window.name.Text;
                 if (!item.ChangeLocation(window.location.Text))
-                    MessageBox.Show("App is already exist in the list.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("App already exists in the list.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
                 item.Priority = Convert.ToByte(window.priority.Value);
                 AppList.ListHasChanged = true;
             }

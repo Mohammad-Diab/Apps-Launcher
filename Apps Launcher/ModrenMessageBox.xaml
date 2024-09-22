@@ -5,13 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Apps_Launcher"
         mc:Ignorable="d"
-        Title="ModrenMessageBox" Height="154.113" Width="460.15" FontSize="14" ResizeMode="NoResize">
+        Title="Run command" Height="154.113" Width="460.15" FontSize="14" ResizeMode="NoResize">
     <Grid>
         <Button x:Name="button" Content="OK" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="75" Background="Transparent" BorderBrush="ForestGreen" BorderThickness="2,1" Click="OK_Click"/>
         <Button x:Name="button1" Content="Cancel" HorizontalAlignment="Right" Margin="0,0,90,10" VerticalAlignment="Bottom" Width="75" Background="Transparent" BorderBrush="Tomato" BorderThickness="2,1" Click="Cancel_Click"/>
         <TextBox x:Name="textBox" Height="23" Margin="10,34,10,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
         <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Enter command arguments:" VerticalAlignment="Top"/>
-        <TextBlock x:Name="textBlock1" HorizontalAlignment="Left" Margin="10,62,0,0" TextWrapping="Wrap" Text="leave empty tor run command only." VerticalAlignment="Top" FontSize="12
+        <TextBlock x:Name="textBlock1" HorizontalAlignment="Left" Margin="10,62,0,0" TextWrapping="Wrap" Text="Leave empty to run the command only." VerticalAlignment="Top" FontSize="12
                    " Foreground="RoyalBlue"/>
 
     </Grid>
