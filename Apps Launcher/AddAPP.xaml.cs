@@ -95,6 +95,7 @@ namespace Apps_Launcher
                 item.AppName = window.name.Text;
                 item.ChangeLocation(window.location.Text);
                 item.Priority = Convert.ToByte(window.priority.Value);
+                AppList.ListHasChanged = true;
             }
         }
 
