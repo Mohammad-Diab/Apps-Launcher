@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -18,6 +19,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shell;
+using System.Xml.Linq;
 
 namespace Apps_Launcher
 {
@@ -718,6 +720,57 @@ namespace Apps_Launcher
             search.Text = "";
         }
 
+        private void ImportOldSettings()
+        {
+            FileInfo config = null;
+            string[] companies;
+            try { companies = Directory.GetDirectories(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)); }
+            catch (Exception) { return; }
+            foreach (var company in companies)
+            {
+                try
+                {
+                    foreach (var app in Directory.GetDirectories(company, "App_Launcher.exe_*"))
+                        foreach (var version in Directory.GetDirectories(app))
+                            if (File.Exists(version + "\\user.config") && (config == null || new FileInfo(version + "\\user.config").LastWriteTime > config.LastWriteTime))
+                                config = new FileInfo(version + "\\user.config");
+                }
+                catch (Exception) { }
+            }
+            if (config == null)
+                return;
+            try
+            {
+                foreach (var setting in XDocument.Load(config.FullName).Descendants("setting"))
+                {
+                    string value = setting.Element("value").Value;
+                    switch (setting.Attribute("name").Value)
+                    {
+                        case "Width":
+                            Properties.Settings.Default.Width = double.Parse(value, CultureInfo.InvariantCulture);
+                            break;
+                        case "Height":
+                            Properties.Settings.Default.Height = double.Parse(value, CultureInfo.InvariantCulture);
+                            break;
+                        case "Xpos":
+                            Properties.Settings.Default.Xpos = double.Parse(value, CultureInfo.InvariantCulture);
+                            break;
+                        case "Ypos":
+                            Properties.Settings.Default.Ypos = double.Parse(value, CultureInfo.InvariantCulture);
+                            break;
+                        case "HideTitlebar":
+                            Properties.Settings.Default.HideTitlebar = bool.Parse(value);
+                            break;
+                        case "HideToRight":
+                            Properties.Settings.Default.HideToRight = !bool.Parse(value);
+                            break;
+                    }
+                }
+                Properties.Settings.Default.Save();
+            }
+            catch (Exception) { }
+        }
+
         #endregion
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -738,6 +791,17 @@ namespace Apps_Launcher
 
             //read apps list
             string err;
+            if (!File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist") && File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist"))
+            {
+                try
+                {
+                    if (!Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\"))
+                        Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\");
+                    File.Copy(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\App Launcher\\applist", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist");
+                }
+                catch (Exception) { }
+                ImportOldSettings();
+            }
             if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist"))
             {
                 if (new FileInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist").Length > 7)
