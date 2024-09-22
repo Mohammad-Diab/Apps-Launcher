@@ -73,7 +73,7 @@ namespace Apps_Launcher
             img.Height = img.Width = 48;
             img.HorizontalAlignment = HorizontalAlignment.Left;
             img.Margin = img_thickness;
-            img.Source = Imaging.CreateBitmapSourceFromHIcon(System.Drawing.Icon.ExtractAssociatedIcon(app.Location).Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            img.Source = Applications.GetImage(app.Location, 48);
 
             TextBox name = new TextBox();
             name.Text = app.AppName;
