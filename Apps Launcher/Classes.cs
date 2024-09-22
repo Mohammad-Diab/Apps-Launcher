@@ -98,7 +98,7 @@ namespace Apps_Launcher
                 {
                     l += 55;
                     int x = name.ToLower().IndexOf(search);
-                    l += (x * 50 / name.Length);
+                    l += ((name.Length - x) * 50 / name.Length);
                 }
                 if (Path.GetFileName(Location).ToLower().Contains(search))
                     l += 30;
