@@ -346,7 +346,7 @@ namespace Apps_Launcher
                         {
                             name = Path.GetFileNameWithoutExtension(tmp);
                             if (!win_app_list.ContainsKey(name.ToLower()))
-                                win_app_list.Add(name, tmp);
+                                win_app_list.Add(name.ToLower(), tmp);
                         }
                     }
                     sw.Close();
