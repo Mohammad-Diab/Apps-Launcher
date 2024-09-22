@@ -743,6 +743,8 @@ namespace Apps_Launcher
                     while (!AppList.LoadFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist", out err))
                         if (MessageBox.Show("Error while loading the file:\n" + err + ".\nTry again?", "Apps Launcher", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                         {
+                            try { File.Copy(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist.bak", true); }
+                            catch (Exception) { }
                             AppList.Dictionary = new Dictionary<string, AppItem>();
                             AppList.List = new List<AppItem>();
                             break;
