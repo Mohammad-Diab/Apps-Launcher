@@ -56,7 +56,7 @@ namespace Apps_Launcher
                         if (AppList.Layout == HideLayout.HideToLeft)
                             MoveWindow(-ActualWidth, -ActualWidth + 20, true);
                         else
-                            MoveWindow(SystemParameters.PrimaryScreenWidth, Left + ActualWidth - 20, true);
+                            MoveWindow(SystemParameters.PrimaryScreenWidth, SystemParameters.PrimaryScreenWidth - 15, true);
                         OpenMenu = false;
                         break;
                     case WindowVisibility.Show:
