@@ -41,5 +41,12 @@ namespace Apps_Launcher
             try { st.Close(); }
             catch (Exception) { }
         }
+
+        private void Application_SessionEnding(object sender, SessionEndingCancelEventArgs e)
+        {
+            string err;
+            if (AppList.ListHasChanged)
+                AppList.SaveFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Apps Launcher\\applist", out err);
+        }
     }
 }
