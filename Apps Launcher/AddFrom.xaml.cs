@@ -186,22 +186,22 @@ namespace Apps_Launcher
         private void CheckAll_Click(object sender, RoutedEventArgs e)
         {
             foreach (ListBoxItem i in app_list.Items)
-                ((CheckBox)((Grid)i.Content).Children[3]).IsChecked = true;
+                ((CheckBox)i.Content).IsChecked = true;
         }
 
         private void UncheckAll_Click(object sender, RoutedEventArgs e)
         {
             foreach (ListBoxItem i in app_list.Items)
-                ((CheckBox)((Grid)i.Content).Children[3]).IsChecked = false;
+                ((CheckBox)i.Content).IsChecked = false;
         }
 
         private void Invert_Click(object sender, RoutedEventArgs e)
         {
             foreach (ListBoxItem i in app_list.Items)
-                if (((CheckBox)((Grid)i.Content).Children[3]).IsChecked == false)
-                    ((CheckBox)((Grid)i.Content).Children[3]).IsChecked = true;
+                if (((CheckBox)i.Content).IsChecked == false)
+                    ((CheckBox)i.Content).IsChecked = true;
                 else
-                    ((CheckBox)((Grid)i.Content).Children[3]).IsChecked = false;
+                    ((CheckBox)i.Content).IsChecked = false;
         }
     }
 }
