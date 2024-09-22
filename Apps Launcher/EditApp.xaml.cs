@@ -216,8 +216,10 @@ namespace Apps_Launcher
                     MessageBox.Show("App already exist in the list.", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
                 else
                 {
+                    var app = CreateItem(item, true);
                     new_apps.Add(item.Location.ToLower(), item);
-                    app_list.Items.Add(CreateItem(item, true));
+                    new_apps_for_list.Add(item.Location.ToLower(), app);
+                    app_list.Items.Add(app);
                 }
             }
             Count.Text = app_list.Items.Count + (app_list.Items.Count == 1 ? " item" : " items");
@@ -424,13 +426,16 @@ namespace Apps_Launcher
                 {
                     foreach (var i in new_apps_list)
                     {
-                        if (!new_apps.ContainsKey(i))
+                        if (!new_apps.ContainsKey(i.ToLower()))
                         {
                             var tmp = new AppItem(Path.GetFileNameWithoutExtension(i), i, 4);
-                            new_apps.Add(i, tmp);
-                            app_list.Items.Add(CreateItem(tmp, true));
+                            var app = CreateItem(tmp, true);
+                            new_apps.Add(i.ToLower(), tmp);
+                            new_apps_for_list.Add(i.ToLower(), app);
+                            app_list.Items.Add(app);
                         }
                     }
+                    Count.Text = app_list.Items.Count + (app_list.Items.Count == 1 ? " item" : " items");
                     MessageBox.Show("Done", "Apps Launcher", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
