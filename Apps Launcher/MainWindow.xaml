@@ -3,11 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Apps Launcher" Height="425" Width="325" MinHeight="80"  Icon="Images/main_icon.png" MinWidth="200"  LocationChanged="Window_LocationChanged" Loaded="Window_Loaded" Closing="Window_Closing" SizeChanged="Window_SizeChanged" MouseEnter="Window_MouseEnter" Deactivated="Window_Deactivated" MouseLeftButtonDown="Window_MouseLeftButtonDown" ShowInTaskbar="False">
     <Grid MouseLeave="Window_MouseLeave" Background="Transparent">
-        <ListBox Name="app_list" Margin="0,29,0,34" BorderThickness="0,1,0,0" BorderBrush="#FF4169E1" PreviewKeyUp="AppList_PreviewKeyUp" AllowDrop="True" Drop="AppList_Drop"/>
+        <ListBox Name="app_list" Margin="0,29,0,34" BorderThickness="0,1,0,0" BorderBrush="#FF4169E1" PreviewKeyDown="AppList_PreviewKeyDown" AllowDrop="True" Drop="AppList_Drop"/>
         <Border BorderBrush="#FFABADB3" BorderThickness="0,2,0,0" Height="34" VerticalAlignment="Bottom">
             <Grid>
                 <TextBlock x:Name="searchbox_placeholder" Margin="7,4,40,0" TextWrapping="Wrap" Text="Search Here" VerticalAlignment="Top" FontSize="18" Foreground="#FF292929" Opacity="0.5" FontStyle="Italic"/>
-                <TextBox Name="search" FontSize="22" TextChanged="Search_TextChanged" PreviewKeyUp="Search_PreviewKeyUp"  Background="{x:Null}" BorderThickness="0"/>
+                <TextBox Name="search" FontSize="22" TextChanged="Search_TextChanged" PreviewKeyDown="Search_PreviewKeyDown"  Background="{x:Null}" BorderThickness="0"/>
 
                 <Image x:Name="image" Height="32" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="32" Margin="0,0,0,0" Source="Images/search-icon.png" Stretch="Fill"/>
                 <Button x:Name="clear_text" HorizontalAlignment="Right" Width="32" Background="White" BorderBrush="{x:Null}" Visibility="Hidden" Click="ClearTextBtm_Click">

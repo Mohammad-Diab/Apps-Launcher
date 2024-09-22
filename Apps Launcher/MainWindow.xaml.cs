@@ -349,9 +349,9 @@ namespace Apps_Launcher
 
         #region Search Engine
 
-        private void Search_PreviewKeyUp(object sender, KeyEventArgs e)
+        private void Search_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            if (e.Key == Key.Enter && !e.IsRepeat)
             {
                 RebuildList(search.Text);
                 if (app_list.Items.Count > 1)
@@ -896,9 +896,9 @@ namespace Apps_Launcher
            DragMove();
         }
 
-        private void AppList_PreviewKeyUp(object sender, KeyEventArgs e)
+        private void AppList_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            if (e.Key == Key.Enter && !e.IsRepeat)
                 if (app_list.SelectedIndex > 0)
                     StartApplication((app_list.SelectedItem as ListBoxItem).ToolTip.ToString(), false);
         }
